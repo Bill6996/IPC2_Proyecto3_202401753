@@ -198,5 +198,35 @@ namespace Backend.Controllers
         // ─────────────────────────────────────────────────────────────────
         private static string RespuestaError(string mensaje) =>
             $"<?xml version=\"1.0\"?><error><mensaje>{mensaje}</mensaje></error>";
+    
+
+
+        // ── GET /api/estadisticas ─────────────────────────────────────────
+        [HttpGet("estadisticas")]
+        public IActionResult GetEstadisticas()
+        {
+            var clientes = _dataSvc.GetClientes();
+            var bancos = _dataSvc.GetBancos();
+            var facturas = _dataSvc.GetFacturas();
+            var pagos = _dataSvc.GetPagos();
+
+            double totalFacturado = facturas.Sum(f => f.Valor);
+            double totalPagado = pagos.Sum(p => p.Valor);
+            double totalPendiente = facturas.Sum(f => f.SaldoPendiente);
+            double totalAFavor = clientes.Sum(c => c.SaldoAFavor);
+
+            return Ok(new
+            {
+                Clientes = clientes.Count,
+                Bancos = bancos.Count,
+                Facturas = facturas.Count,
+                Pagos = pagos.Count,
+                TotalFacturado = Math.Round(totalFacturado, 2),
+                TotalPagado = Math.Round(totalPagado, 2),
+                TotalPendiente = Math.Round(totalPendiente, 2),
+                TotalSaldoAFavor = Math.Round(totalAFavor, 2)
+            });
+        }
+
     }
 }

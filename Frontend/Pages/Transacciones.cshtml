@@ -1,50 +1,146 @@
 @page
 @model TransaccionesModel
-@{ ViewData["Title"] = "Cargar Transacciones"; }
+@{
+    ViewData["Title"] = "Cargar Transacciones";
+}
 
-<h2 class="mb-4"><i class="bi bi-file-earmark-arrow-up-fill text-success me-2"></i>Cargar transac.xml</h2>
+<h2 class="mb-4">
+    <i class="bi bi-file-earmark-arrow-up-fill text-success me-2"></i>Cargar transac.xml
+</h2>
 
-<div class="card p-4 mb-4" style="max-width:600px;">
-    <form method="post" enctype="multipart/form-data">
-        <div class="mb-3">
-            <label class="form-label fw-bold">Selecciona el archivo transac.xml</label>
-            <input type="file" name="archivo" accept=".xml" class="form-control" required/>
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card p-4">
+            <h6 class="text-muted mb-3">Selecciona el archivo de transacciones</h6>
+            <form method="post" enctype="multipart/form-data" id="formTransac">
+                <div class="mb-3">
+                    <div class="border-2 border-dashed rounded p-4 text-center"
+                         style="border-color:#198754; background:#f0fff4; cursor:pointer;"
+                         onclick="document.getElementById('archivoInput').click()">
+                        <i class="bi bi-cloud-upload fs-2 text-success mb-2 d-block"></i>
+                        <div class="fw-semibold">Haz click para seleccionar</div>
+                        <div class="text-muted small" id="nombreArchivo">Solo archivos .xml</div>
+                    </div>
+                    <input type="file" name="archivo" id="archivoInput"
+                           accept=".xml" class="d-none" required
+                           onchange="document.getElementById('nombreArchivo').textContent = this.files[0]?.name ?? 'Solo archivos .xml'" />
+                </div>
+                <button type="submit" class="btn btn-success w-100" id="btnCargar">
+                    <i class="bi bi-upload me-1"></i>Cargar y Procesar
+                </button>
+            </form>
         </div>
-        <button type="submit" class="btn btn-success">
-            <i class="bi bi-upload me-1"></i>Cargar y Procesar
-        </button>
-    </form>
-</div>
 
-@if (Model.Respuesta != null)
-{
-    <div class="card p-4" style="max-width:640px;">
-        <h5>Resultado del procesamiento</h5>
-        <table class="table table-bordered mt-3">
-            <thead class="table-success">
-                <tr><th>Entidad</th><th>Nuevas/Nuevos</th><th>Duplicadas/os</th><th>Con Error</th></tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Facturas</td>
-                    <td>@Model.Respuesta.NuevasFacturas</td>
-                    <td>@Model.Respuesta.FacturasDuplicadas</td>
-                    <td>@Model.Respuesta.FacturasConError</td>
-                </tr>
-                <tr>
-                    <td>Pagos</td>
-                    <td>@Model.Respuesta.NuevosPagos</td>
-                    <td>@Model.Respuesta.PagosDuplicados</td>
-                    <td>@Model.Respuesta.PagosConError</td>
-                </tr>
-            </tbody>
-        </table>
-        <h6 class="mt-3">XML de respuesta:</h6>
-        <pre class="xml-response">@Model.RespuestaXml</pre>
+        <div class="card p-4 mt-4">
+            <h6 class="text-muted mb-3">
+                <i class="bi bi-info-circle me-2"></i>Formato del archivo
+            </h6>
+            <pre style="font-size:.78rem; background:#f8f9fa; padding:.75rem; border-radius:6px; margin:0;">&lt;?xml version="1.0"?&gt;
+                &lt;transacciones&gt;
+                &lt;facturas&gt;
+                &lt;factura&gt;
+                &lt;numeroFactura&gt;FACT-001&lt;/numeroFactura&gt;
+                &lt;NITcliente&gt;123456-7&lt;/NITcliente&gt;
+                &lt;fecha&gt;15/01/2024&lt;/fecha&gt;
+                &lt;valor&gt;1500.00&lt;/valor&gt;
+                &lt;/factura&gt;
+                &lt;/facturas&gt;
+                &lt;pagos&gt;
+                &lt;pago&gt;
+                &lt;codigoBanco&gt;1&lt;/codigoBanco&gt;
+                &lt;fecha&gt;31/01/2024&lt;/fecha&gt;
+                &lt;NITcliente&gt;123456-7&lt;/NITcliente&gt;
+                &lt;valor&gt;1500.00&lt;/valor&gt;
+                &lt;/pago&gt;
+                &lt;/pagos&gt;
+                &lt;/transacciones&gt;</pre>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            @if (Model.Respuesta != null)
+            {
+                <div class="card p-4 border-start border-success border-4">
+                    <h6><i class="bi bi-check-circle-fill text-success me-2"></i>Resultado del procesamiento</h6>
+
+                    <!-- Facturas -->
+                    <h6 class="mt-3 text-muted">
+                        <i class="bi bi-receipt me-1"></i>Facturas
+                    </h6>
+                    <div class="row g-2 mb-3">
+                        <div class="col-4">
+                            <div class="card bg-light p-2 text-center">
+                                <div class="fs-4 fw-bold text-success">@Model.Respuesta.NuevasFacturas</div>
+                                <div class="small text-muted">Nuevas</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="card bg-light p-2 text-center">
+                                <div class="fs-4 fw-bold text-warning">@Model.Respuesta.FacturasDuplicadas</div>
+                                <div class="small text-muted">Duplicadas</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="card bg-light p-2 text-center">
+                                <div class="fs-4 fw-bold text-danger">@Model.Respuesta.FacturasConError</div>
+                                <div class="small text-muted">Con error</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pagos -->
+                    <h6 class="text-muted">
+                        <i class="bi bi-cash-stack me-1"></i>Pagos
+                    </h6>
+                    <div class="row g-2 mb-3">
+                        <div class="col-4">
+                            <div class="card bg-light p-2 text-center">
+                                <div class="fs-4 fw-bold text-success">@Model.Respuesta.NuevosPagos</div>
+                                <div class="small text-muted">Nuevos</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="card bg-light p-2 text-center">
+                                <div class="fs-4 fw-bold text-warning">@Model.Respuesta.PagosDuplicados</div>
+                                <div class="small text-muted">Duplicados</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="card bg-light p-2 text-center">
+                                <div class="fs-4 fw-bold text-danger">@Model.Respuesta.PagosConError</div>
+                                <div class="small text-muted">Con error</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h6 class="text-muted">Respuesta XML del API:</h6>
+                    <pre class="xml-response">@Model.RespuestaXml</pre>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.Error))
+            {
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle me-2"></i>@Model.Error
+                </div>
+            }
+
+            @if (Model.Respuesta == null && string.IsNullOrEmpty(Model.Error))
+            {
+                <div class="card p-4 h-100 d-flex align-items-center justify-content-center text-center">
+                    <i class="bi bi-arrow-left-circle fs-1 text-muted mb-3"></i>
+                    <p class="text-muted">Selecciona y carga un transac.xml para ver los resultados.</p>
+                </div>
+            }
+        </div>
     </div>
-}
 
-@if (!string.IsNullOrEmpty(Model.Error))
-{
-    <div class="alert alert-danger mt-3">@Model.Error</div>
-}
+    @section Scripts {
+        <script>
+            document.getElementById('formTransac').addEventListener('submit', function() {
+                const btn = document.getElementById('btnCargar');
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
+            });
+        </script>
+    }

@@ -9,63 +9,43 @@
     <link rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
     <style>
-        :root {
-            --itgsa-dark:  #1a3c5e;
-            --itgsa-mid:   #2e6da4;
-            --itgsa-light: #cce4ff;
-        }
-        body { background:#f4f6f9; font-family: 'Segoe UI', sans-serif; }
-        .navbar-brand { font-weight:700; letter-spacing:1px; }
-
-        /* Sidebar */
+        body { background: #f4f6f9; font-family: 'Segoe UI', sans-serif; }
+        .navbar-brand { font-weight: 700; letter-spacing: 1px; }
         .sidebar {
             min-height: calc(100vh - 56px);
-            background: var(--itgsa-dark);
+            background: #1a3c5e;
             width: 230px;
             flex-shrink: 0;
-            position: sticky;
-            top: 56px;
-            height: calc(100vh - 56px);
-            overflow-y: auto;
         }
         .sidebar a {
-            color: var(--itgsa-light);
+            color: #cce4ff;
             text-decoration: none;
             display: block;
             padding: 9px 18px;
             border-radius: 6px;
             margin: 2px 8px;
             font-size: .92rem;
-            transition: background .15s;
         }
-        .sidebar a:hover  { background: var(--itgsa-mid); color:#fff; }
-        .sidebar a.active { background: var(--itgsa-mid); color:#fff; font-weight:600; }
+        .sidebar a:hover  { background: #2e6da4; color: #fff; }
+        .sidebar a.active { background: #2e6da4; color: #fff; font-weight: 600; }
         .sidebar .section-title {
             color: #6ea8d8;
             font-size: .72rem;
             text-transform: uppercase;
-            letter-spacing: .08rem;
             padding: 14px 20px 3px;
         }
-
-        /* Cards y contenido */
-        .main-content { padding:2rem; min-width:0; }
-        .card { border:none; border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,.08); }
-        .card-header { border-radius: 12px 12px 0 0 !important; }
+        .main-content { padding: 2rem; min-width: 0; }
+        .card { border: none; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,.08); }
         pre.xml-response {
-            background:#1e1e1e; color:#d4d4d4;
-            padding:1rem; border-radius:8px;
-            font-size:.82rem; max-height:260px; overflow-y:auto;
+            background: #1e1e1e; color: #d4d4d4;
+            padding: 1rem; border-radius: 8px;
+            font-size: .82rem; max-height: 260px; overflow-y: auto;
         }
-
-        /* Toast de notificaciones */
-        .toast-container { position:fixed; bottom:1.5rem; right:1.5rem; z-index:9999; }
     </style>
 </head>
 <body>
 
-<!-- Navbar top -->
-<nav class="navbar navbar-dark px-3 sticky-top" style="background:var(--itgsa-dark);">
+<nav class="navbar navbar-dark px-3" style="background:#1a3c5e;">
     <a class="navbar-brand" href="/">
         <i class="bi bi-shop-window me-2"></i>ITGSA Sistema
     </a>
@@ -75,52 +55,51 @@
         </span>
         <a href="http://localhost:5001/swagger" target="_blank"
            class="btn btn-outline-light btn-sm">
-            <i class="bi bi-box-arrow-up-right me-1"></i>Swagger API
+            <i class="bi bi-code-slash me-1"></i>Swagger API
         </a>
     </div>
 </nav>
 
 <div class="d-flex">
-    <!-- Sidebar -->
     <div class="sidebar">
-        <div class="section-title">General</div>
         @{
-            string path = ViewContext.HttpContext.Request.Path;
-            string Cls(string p) => path == p || path.StartsWith(p + "/") ? "active" : "";
+            string currentPath = ViewContext.HttpContext.Request.Path.Value ?? "";
+            string Active(string p) => currentPath == p || currentPath.StartsWith(p + "/") ? "active" : "";
         }
-        <a href="/" class="@(path == "/" ? "active" : "")">
+
+        <div class="section-title">General</div>
+        <a href="/" class="@(currentPath == "/" ? "active" : "")">
             <i class="bi bi-speedometer2 me-2"></i>Panel de control
         </a>
-        <a href="/Reset" class="@Cls("/Reset")">
+        <a href="/Reset" class="@Active("/Reset")">
             <i class="bi bi-arrow-counterclockwise me-2"></i>Resetear datos
         </a>
 
         <div class="section-title">Archivos de entrada</div>
-        <a href="/Configuracion" class="@Cls("/Configuracion")">
+        <a href="/Configuracion" class="@Active("/Configuracion")">
             <i class="bi bi-gear me-2"></i>Cargar config.xml
         </a>
-        <a href="/Transacciones" class="@Cls("/Transacciones")">
+        <a href="/Transacciones" class="@Active("/Transacciones")">
             <i class="bi bi-file-earmark-arrow-up me-2"></i>Cargar transac.xml
         </a>
 
         <div class="section-title">Peticiones</div>
-        <a href="/EstadoCuenta" class="@Cls("/EstadoCuenta")">
+        <a href="/EstadoCuenta" class="@Active("/EstadoCuenta")">
             <i class="bi bi-person-lines-fill me-2"></i>Estado de cuenta
         </a>
-        <a href="/Ingresos" class="@Cls("/Ingresos")">
+        <a href="/Ingresos" class="@Active("/Ingresos")">
             <i class="bi bi-bar-chart-fill me-2"></i>Ingresos por banco
         </a>
 
         <div class="section-title">Información</div>
-        <a href="/Ayuda" class="@Cls("/Ayuda")">
+        <a href="/Ayuda" class="@Active("/Ayuda")">
             <i class="bi bi-question-circle me-2"></i>Ayuda
         </a>
-        <a href="/Ayuda/Documentacion" class="@Cls("/Ayuda/Documentacion")">
+        <a href="/Ayuda/Documentacion" class="@Active("/Ayuda/Documentacion")">
             <i class="bi bi-file-earmark-text me-2"></i>Documentación
         </a>
     </div>
 
-    <!-- Contenido principal -->
     <div class="main-content flex-grow-1">
         @if (TempData["Error"] != null)
         {

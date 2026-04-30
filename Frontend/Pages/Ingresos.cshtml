@@ -17,15 +17,13 @@
                         for (int m = 1; m <= 12; m++)
                         {
                             var name = culture.DateTimeFormat.GetMonthName(m);
-                            <option value="@m" selected="@(m == Model.Mes ? "selected" : null)">
-                                @name
-                            </option>
+                            <option value="@m" selected="@(m == Model.Mes ? "selected" : null)">@name</option>
                         }
                     }
                 </select>
             </div>
             <div class="col">
-                <label class="form-label fw-bold">Año</label>
+                <label class="form-label fw-bold">Ano</label>
                 <input type="number" name="anio" value="@Model.Anio"
                        class="form-control" min="2020" max="2099" />
             </div>
@@ -49,14 +47,12 @@
 
     <div class="card p-4 mb-4" style="max-width:850px;">
         <h6 class="text-muted mb-3">
-            Ingresos por banco — últimos 3 meses a partir de
-            @System.Globalization.CultureInfo.GetCultureInfo("es-ES")
-            .DateTimeFormat.GetMonthName(Model.Mes)/@Model.Anio
+            Ingresos por banco &mdash; Ultimos 3 meses a partir de
+            @(System.Globalization.CultureInfo.GetCultureInfo("es-ES").DateTimeFormat.GetMonthName(Model.Mes))/@Model.Anio
         </h6>
         <canvas id="chartIngresos" height="110"></canvas>
     </div>
 
-    <!-- Tabla resumen -->
     <div class="card p-4" style="max-width:850px;">
         <h6 class="text-muted mb-3">Tabla de datos</h6>
         <table class="table table-bordered table-striped table-sm">
@@ -82,7 +78,7 @@
                             <td class="text-center">Q. @mes.Total.ToString("N2")</td>
                         }
                         <td class="text-end fw-bold text-primary">
-                            Q. @banco.Meses.Sum(m => m.Total).ToString("N2")
+                            Q. @banco.Meses.Sum(x => x.Total).ToString("N2")
                         </td>
                     </tr>
                 }
@@ -96,7 +92,7 @@
                         <td class="text-center fw-bold">Q. @totalCol.ToString("N2")</td>
                     }
                     <td class="text-end fw-bold text-primary">
-                        Q. @Model.Datos.Sum(b => b.Meses.Sum(m => m.Total)).ToString("N2")
+                        Q. @Model.Datos.Sum(b => b.Meses.Sum(x => x.Total)).ToString("N2")
                     </td>
                 </tr>
             </tfoot>
@@ -117,14 +113,13 @@ else if (Request.Query.ContainsKey("mes"))
             const labels = datos.map(d => d.nombre);
             const meses = datos[0].meses;
             const palette = ['#0d6efd', '#fd7e14', '#6c757d', '#198754'];
-            const culture = 'es-ES';
+            const monthNames = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
 
             const datasets = meses.map((m, i) => {
-                const label = new Date(m.anio, m.mes - 1, 1)
-                    .toLocaleDateString('es-GT', { month: 'short', year: 'numeric' });
+                const label = monthNames[m.Mes - 1] + " " + m.Anio;
                 return {
-                    label,
-                    data: datos.map(b => (b.meses[i].total / 1000).toFixed(2)),
+                    label: label,
+                    data: datos.map(b => (b.meses[i].Total / 1000).toFixed(2)),
                     backgroundColor: palette[i % palette.length],
                     borderRadius: 4
                 };
@@ -132,7 +127,7 @@ else if (Request.Query.ContainsKey("mes"))
 
             new Chart(document.getElementById('chartIngresos'), {
                 type: 'bar',
-                data: { labels, datasets },
+                data: { labels: labels, datasets: datasets },
                 options: {
                     responsive: true,
                     plugins: {
@@ -144,7 +139,9 @@ else if (Request.Query.ContainsKey("mes"))
                         },
                         tooltip: {
                             callbacks: {
-                                label: ctx => ` Q. ${(ctx.parsed.y * 1000).toLocaleString('es-GT', { minimumFractionDigits: 2 })} (${ctx.dataset.label})`
+                                label: function(ctx) {
+                                    return ' Q. ' + (ctx.parsed.y * 1000).toLocaleString('es-GT', { minimumFractionDigits: 2 }) + ' (' + ctx.dataset.label + ')';
+                                }
                             }
                         }
                     },

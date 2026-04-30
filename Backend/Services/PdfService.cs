@@ -170,7 +170,7 @@ namespace Backend.Services
                         col.Item().Text(
                             $"Período: {NombreMes(meses.Last().m)}/{meses.Last().a} — " +
                             $"{NombreMes(meses.First().m)}/{meses.First().a}")
-                            .FontSize(10).FontColor(Colors.Grey.Darkest);
+                            .FontSize(10).FontColor(Colors.Black);
 
                         col.Item().Text($"Generado el: {DateTime.Now:dd/MM/yyyy HH:mm}")
                             .FontSize(9).FontColor(Colors.Grey.Medium);

@@ -1,38 +1,118 @@
 @page
 @model ConfiguracionModel
-@{ ViewData["Title"] = "Cargar Configuración"; }
+@{
+    ViewData["Title"] = "Cargar Configuración";
+}
 
 <h2 class="mb-4"><i class="bi bi-gear-fill text-primary me-2"></i>Cargar config.xml</h2>
 
-<div class="card p-4 mb-4" style="max-width:600px;">
-    <form method="post" enctype="multipart/form-data">
-        <div class="mb-3">
-            <label class="form-label fw-bold">Selecciona el archivo config.xml</label>
-            <input type="file" name="archivo" accept=".xml" class="form-control" required/>
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card p-4">
+            <h6 class="text-muted mb-3">Selecciona el archivo de configuración</h6>
+            <form method="post" enctype="multipart/form-data" id="formConfig">
+                <div class="mb-3">
+                    <div class="border-2 border-dashed rounded p-4 text-center"
+                         style="border-color:#2e6da4; background:#f0f6ff; cursor:pointer;"
+                         onclick="document.getElementById('archivoInput').click()">
+                        <i class="bi bi-cloud-upload fs-2 text-primary mb-2 d-block"></i>
+                        <div class="fw-semibold">Haz click para seleccionar</div>
+                        <div class="text-muted small" id="nombreArchivo">
+                            Solo archivos .xml
+                        </div>
+                    </div>
+                    <input type="file" name="archivo" id="archivoInput"
+                           accept=".xml" class="d-none" required
+                           onchange="document.getElementById('nombreArchivo').textContent = this.files[0]?.name ?? 'Solo archivos .xml'" />
+                </div>
+                <button type="submit" class="btn btn-primary w-100" id="btnCargar">
+                    <i class="bi bi-upload me-1"></i>Cargar y Procesar
+                </button>
+            </form>
         </div>
-        <button type="submit" class="btn btn-primary">
-            <i class="bi bi-upload me-1"></i>Cargar y Procesar
-        </button>
-    </form>
-</div>
 
-@if (Model.Respuesta != null)
-{
-    <div class="card p-4" style="max-width:600px;">
-        <h5>Resultado del procesamiento</h5>
-        <table class="table table-bordered mt-3">
-            <thead class="table-primary"><tr><th>Entidad</th><th>Creados</th><th>Actualizados</th></tr></thead>
-            <tbody>
-                <tr><td>Clientes</td><td>@Model.Respuesta.ClientesCreados</td><td>@Model.Respuesta.ClientesActualizados</td></tr>
-                <tr><td>Bancos</td><td>@Model.Respuesta.BancosCreados</td><td>@Model.Respuesta.BancosActualizados</td></tr>
-            </tbody>
-        </table>
-        <h6 class="mt-3">XML de respuesta:</h6>
-        <pre class="xml-response">@Model.RespuestaXml</pre>
+        <!-- Formato esperado -->
+        <div class="card p-4 mt-4">
+            <h6 class="text-muted mb-3">
+                <i class="bi bi-info-circle me-2"></i>Formato del archivo
+            </h6>
+            <pre style="font-size:.78rem; background:#f8f9fa; padding:.75rem; border-radius:6px; margin:0;">&lt;?xml version="1.0"?&gt;
+                &lt;config&gt;
+                &lt;clientes&gt;
+                &lt;cliente&gt;
+                &lt;NIT&gt;123456-7&lt;/NIT&gt;
+                &lt;nombre&gt;Nombre del cliente&lt;/nombre&gt;
+                &lt;/cliente&gt;
+                &lt;/clientes&gt;
+                &lt;bancos&gt;
+                &lt;banco&gt;
+                &lt;codigo&gt;1&lt;/codigo&gt;
+                &lt;nombre&gt;Nombre del banco&lt;/nombre&gt;
+                &lt;/banco&gt;
+                &lt;/bancos&gt;
+                &lt;/config&gt;</pre>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            @if (Model.Respuesta != null)
+            {
+                <div class="card p-4 border-start border-success border-4">
+                    <h6><i class="bi bi-check-circle-fill text-success me-2"></i>Resultado del procesamiento</h6>
+                    <div class="row g-3 mt-1">
+                        <div class="col-6">
+                            <div class="card bg-light p-3 text-center">
+                                <div class="fs-3 fw-bold text-success">@Model.Respuesta.ClientesCreados</div>
+                                <div class="small text-muted">Clientes creados</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card bg-light p-3 text-center">
+                                <div class="fs-3 fw-bold text-warning">@Model.Respuesta.ClientesActualizados</div>
+                                <div class="small text-muted">Clientes actualizados</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card bg-light p-3 text-center">
+                                <div class="fs-3 fw-bold text-success">@Model.Respuesta.BancosCreados</div>
+                                <div class="small text-muted">Bancos creados</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card bg-light p-3 text-center">
+                                <div class="fs-3 fw-bold text-warning">@Model.Respuesta.BancosActualizados</div>
+                                <div class="small text-muted">Bancos actualizados</div>
+                            </div>
+                        </div>
+                    </div>
+                    <h6 class="mt-3 text-muted">Respuesta XML del API:</h6>
+                    <pre class="xml-response">@Model.RespuestaXml</pre>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.Error))
+            {
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle me-2"></i>@Model.Error
+                </div>
+            }
+
+            @if (Model.Respuesta == null && string.IsNullOrEmpty(Model.Error))
+            {
+                <div class="card p-4 h-100 d-flex align-items-center justify-content-center text-center">
+                    <i class="bi bi-arrow-left-circle fs-1 text-muted mb-3"></i>
+                    <p class="text-muted">Selecciona y carga un archivo config.xml para ver los resultados aquí.</p>
+                </div>
+            }
+        </div>
     </div>
-}
 
-@if (!string.IsNullOrEmpty(Model.Error))
-{
-    <div class="alert alert-danger mt-3">@Model.Error</div>
-}
+    @section Scripts {
+        <script>
+            document.getElementById('formConfig').addEventListener('submit', function() {
+                const btn = document.getElementById('btnCargar');
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
+            });
+        </script>
+    }

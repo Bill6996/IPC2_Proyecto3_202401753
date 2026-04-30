@@ -1,105 +1,149 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Inicio";
+    ViewData["Title"] = "Panel de Control";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><i class="bi bi-speedometer2 text-primary me-2"></i>Panel de Control — ITGSA</h2>
-    <small class="text-muted">
-        @DateTime.Now.ToString("dddd, dd 'de' MMMM 'de' yyyy",
-        System.Globalization.CultureInfo.GetCultureInfo("es-ES"))
-    </small>
+    <div>
+        <h2 class="mb-0">
+        </label>Panel de Control</label>
+        </h2>
+        <small class="text-muted">
+            @DateTime.Now.ToString("dddd, dd 'de' MMMM 'de' yyyy",
+                System.Globalization.CultureInfo.GetCultureInfo("es-ES"))
+        </small>
+    </div>
+    <button class="btn btn-outline-primary btn-sm" onclick="location.reload()">
+        <i class="bi bi-arrow-clockwise me-1"></i>Actualizar
+    </button>
 </div>
 
-<!-- Estadísticas rápidas -->
+<!-- Estadísticas de entidades -->
 <div class="row g-3 mb-4">
-    <div class="col-6 col-md-3">
+    <div class="col-6 col-lg-3">
         <div class="card p-3 text-center border-start border-primary border-4">
-            <div class="fs-2 fw-bold text-primary">@Model.TotalClientes</div>
+            <div class="fs-1 fw-bold text-primary">@Model.Stats.Clientes</div>
             <div class="text-muted small">Clientes</div>
         </div>
     </div>
-    <div class="col-6 col-md-3">
+    <div class="col-6 col-lg-3">
         <div class="card p-3 text-center border-start border-success border-4">
-            <div class="fs-2 fw-bold text-success">@Model.TotalBancos</div>
+            <div class="fs-1 fw-bold text-success">@Model.Stats.Bancos</div>
             <div class="text-muted small">Bancos</div>
         </div>
     </div>
-    <div class="col-6 col-md-3">
+    <div class="col-6 col-lg-3">
         <div class="card p-3 text-center border-start border-warning border-4">
-            <div class="fs-2 fw-bold text-warning">@Model.TotalFacturas</div>
+            <div class="fs-1 fw-bold text-warning">@Model.Stats.Facturas</div>
             <div class="text-muted small">Facturas</div>
         </div>
     </div>
-    <div class="col-6 col-md-3">
+    <div class="col-6 col-lg-3">
         <div class="card p-3 text-center border-start border-info border-4">
-            <div class="fs-2 fw-bold text-info">@Model.TotalPagos</div>
+            <div class="fs-1 fw-bold text-info">@Model.Stats.Pagos</div>
             <div class="text-muted small">Pagos</div>
         </div>
     </div>
 </div>
 
-<!-- Accesos directos -->
-<div class="row g-4">
-    <div class="col-md-6 col-lg-4">
-        <div class="card p-4 text-center h-100">
-            <i class="bi bi-gear-fill fs-1 text-primary mb-2"></i>
-            <h5>Cargar Configuración</h5>
-            <p class="text-muted small">Registra nuevos clientes y bancos al sistema cargando un archivo config.xml.</p>
-            <a href="/Configuracion" class="btn btn-primary mt-auto">
-                <i class="bi bi-upload me-1"></i>Cargar config.xml
-            </a>
+<!-- Estadísticas monetarias -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card p-3">
+            <div class="text-muted small mb-1">Total facturado</div>
+            <div class="fs-5 fw-bold">Q. @Model.Stats.TotalFacturado.ToString("N2")</div>
         </div>
     </div>
-    <div class="col-md-6 col-lg-4">
-        <div class="card p-4 text-center h-100">
-            <i class="bi bi-file-earmark-arrow-up-fill fs-1 text-success mb-2"></i>
-            <h5>Cargar Transacciones</h5>
-            <p class="text-muted small">Procesa facturas y pagos cargando un archivo transac.xml.</p>
-            <a href="/Transacciones" class="btn btn-success mt-auto">
-                <i class="bi bi-upload me-1"></i>Cargar transac.xml
-            </a>
+    <div class="col-md-3">
+        <div class="card p-3">
+            <div class="text-muted small mb-1"> pagado</div>
+            <div class="fs-5 fw-bold text-success">Q. @Model.Stats.TotalPagado.ToString("N2")</div>
         </div>
     </div>
-    <div class="col-md-6 col-lg-4">
-        <div class="card p-4 text-center h-100">
-            <i class="bi bi-person-lines-fill fs-1 text-info mb-2"></i>
-            <h5>Estado de Cuenta</h5>
-            <p class="text-muted small">Consulta saldos, facturas y pagos de un cliente específico o de todos.</p>
-            <a href="/EstadoCuenta" class="btn btn-info text-white mt-auto">
-                <i class="bi bi-search me-1"></i>Consultar
-            </a>
+    <div class="col-md-3">
+        <div class="card p-3">
+            <div class="text-muted small mb-1">Total pendiente</div>
+            <div class="fs-5 fw-bold @(Model.Stats.TotalPendiente > 0 ? "text-danger" : "text-success")">
+                Q. @Model.Stats.TotalPendiente.ToString("N2")
+            </div>
         </div>
     </div>
-    <div class="col-md-6 col-lg-4">
-        <div class="card p-4 text-center h-100">
-            <i class="bi bi-bar-chart-fill fs-1 text-warning mb-2"></i>
-            <h5>Ingresos por Banco</h5>
-            <p class="text-muted small">Visualiza gráficas de pagos recibidos por banco en los últimos 3 meses.</p>
-            <a href="/Ingresos" class="btn btn-warning mt-auto">
-                <i class="bi bi-graph-up me-1"></i>Ver gráfica
-            </a>
+    <div class="col-md-3">
+        <div class="card p-3">
+            <div class="text-muted small mb-1">Saldo a favor total</div>
+            <div class="fs-5 fw-bold text-info">Q. @Model.Stats.TotalSaldoAFavor.ToString("N2")</div>
         </div>
     </div>
-    <div class="col-md-6 col-lg-4">
-        <div class="card p-4 text-center h-100">
-            <i class="bi bi-arrow-counterclockwise fs-1 text-danger mb-2"></i>
-            <h5>Resetear Sistema</h5>
-            <p class="text-muted small">Elimina todos los datos del sistema para empezar desde cero.</p>
-            <a href="/Reset" class="btn btn-danger mt-auto">
-                <i class="bi bi-trash me-1"></i>Resetear
-            </a>
-        </div>
+</div>
+
+<!-- Acciones rápidas -->
+<h5 class="text-muted mb-3">Mini Panel</h5>
+<div class="row g-3">
+    <div class="col-6 col-md-4">
+        <a href="/Configuracion" class="text-decoration-none">
+            <div class="card p-3 h-100">
+                <div class="d-flex align-items-center mb-2">
+                    
+                    <span class="fw-bold">Cargar config.xml</span>
+                </div>
+                <p class="text-muted small mb-0">Registra o actualiza clientes y bancos.</p>
+            </div>
+        </a>
     </div>
-    <div class="col-md-6 col-lg-4">
-        <div class="card p-4 text-center h-100">
-            <i class="bi bi-question-circle-fill fs-1 text-secondary mb-2"></i>
-            <h5>Ayuda</h5>
-            <p class="text-muted small">Información del estudiante y documentación del sistema ITGSA.</p>
-            <a href="/Ayuda" class="btn btn-secondary mt-auto">
-                <i class="bi bi-book me-1"></i>Ver ayuda
-            </a>
-        </div>
+    <div class="col-6 col-md-4">
+        <a href="/Transacciones" class="text-decoration-none">
+            <div class="card p-3 h-100">
+                <div class="d-flex align-items-center mb-2">
+                    
+                    <span class="fw-bold">Cargar transac.xml</span>
+                </div>
+                <p class="text-muted small mb-0">Procesa facturas y pagos.</p>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-md-4">
+        <a href="/EstadoCuenta" class="text-decoration-none">
+            <div class="card p-3 h-100">
+                <div class="d-flex align-items-center mb-2">
+                    
+                    <span class="fw-bold">Estado de cuenta</span>
+                </div>
+                <p class="text-muted small mb-0">Consulta saldos y transacciones de clientes.</p>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-md-4">
+        <a href="/Ingresos" class="text-decoration-none">
+            <div class="card p-3 h-100">
+                <div class="d-flex align-items-center mb-2">
+                    
+                    <span class="fw-bold">Ingresos por banco</span>
+                </div>
+                <p class="text-muted small mb-0">Gráfica de ingresos de los últimos 3 meses.</p>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-md-4">
+        <a href="/Reset" class="text-decoration-none">
+            <div class="card p-3 h-100">
+                <div class="d-flex align-items-center mb-2">
+                    
+                    <span class="fw-bold">Resetear datos</span>
+                </div>
+                <p class="text-muted small mb-0">Limpia toda la base de datos del sistema.</p>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-md-4">
+        <a href="/Ayuda" class="text-decoration-none">
+            <div class="card p-3 h-100">
+                <div class="d-flex align-items-center mb-2">
+                    
+                    <span class="fw-bold">Ayuda</span>
+                </div>
+                <p class="text-muted small mb-0">Manual del sistema y datos del estudiante.</p>
+            </div>
+        </a>
     </div>
 </div>

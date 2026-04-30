@@ -79,5 +79,15 @@ namespace Frontend.Services
             var res = await Client().GetAsync("bancos");
             return await res.Content.ReadAsStringAsync();
         }
+
+        public async Task<string> GetEstadisticas()
+        {
+            try
+            {
+                var res = await Client().GetAsync("estadisticas");
+                return await res.Content.ReadAsStringAsync();
+            }
+            catch { return "{}"; }
+        }
     }
 }
