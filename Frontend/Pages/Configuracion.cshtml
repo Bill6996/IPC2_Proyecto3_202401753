@@ -1,0 +1,38 @@
+@page
+@model ConfiguracionModel
+@{ ViewData["Title"] = "Cargar Configuración"; }
+
+<h2 class="mb-4"><i class="bi bi-gear-fill text-primary me-2"></i>Cargar config.xml</h2>
+
+<div class="card p-4 mb-4" style="max-width:600px;">
+    <form method="post" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label class="form-label fw-bold">Selecciona el archivo config.xml</label>
+            <input type="file" name="archivo" accept=".xml" class="form-control" required/>
+        </div>
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-upload me-1"></i>Cargar y Procesar
+        </button>
+    </form>
+</div>
+
+@if (Model.Respuesta != null)
+{
+    <div class="card p-4" style="max-width:600px;">
+        <h5>Resultado del procesamiento</h5>
+        <table class="table table-bordered mt-3">
+            <thead class="table-primary"><tr><th>Entidad</th><th>Creados</th><th>Actualizados</th></tr></thead>
+            <tbody>
+                <tr><td>Clientes</td><td>@Model.Respuesta.ClientesCreados</td><td>@Model.Respuesta.ClientesActualizados</td></tr>
+                <tr><td>Bancos</td><td>@Model.Respuesta.BancosCreados</td><td>@Model.Respuesta.BancosActualizados</td></tr>
+            </tbody>
+        </table>
+        <h6 class="mt-3">XML de respuesta:</h6>
+        <pre class="xml-response">@Model.RespuestaXml</pre>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="alert alert-danger mt-3">@Model.Error</div>
+}

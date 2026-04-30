@@ -1,0 +1,36 @@
+@page
+@model AyudaModel
+@{ ViewData["Title"] = "Ayuda"; }
+
+<h2 class="mb-4"><i class="bi bi-question-circle-fill text-secondary me-2"></i>Ayuda</h2>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card p-4">
+            <h5><i class="bi bi-person-badge me-2 text-primary"></i>Información del Estudiante</h5>
+            <table class="table table-borderless mt-3">
+                <tr><td class="fw-bold">Nombre:</td><td>[Tu nombre completo]</td></tr>
+                <tr><td class="fw-bold">Carnet:</td><td>202401753</td></tr>
+                <tr><td class="fw-bold">Curso:</td><td>Introducción a la Programación y Computación 2</td></tr>
+                <tr><td class="fw-bold">Universidad:</td><td>Universidad de San Carlos de Guatemala</td></tr>
+                <tr><td class="fw-bold">Facultad:</td><td>Ingeniería — Ciencias y Sistemas</td></tr>
+            </table>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card p-4">
+            <h5><i class="bi bi-file-earmark-text me-2 text-success"></i>Documentación del Sistema</h5>
+            <p>Este sistema gestiona la facturación y pagos de <strong>ITGSA</strong>.</p>
+            <ul>
+                <li><strong>config.xml</strong>: registra clientes y bancos.</li>
+                <li><strong>transac.xml</strong>: registra facturas y pagos.</li>
+                <li>Los pagos se aplican a la factura más antigua primero.</li>
+                <li>El excedente de pago queda como saldo a favor del cliente.</li>
+                <li>El saldo a favor se aplica automáticamente en la próxima compra.</li>
+            </ul>
+            <a href="http://localhost:5001/swagger" target="_blank" class="btn btn-outline-success btn-sm mt-2">
+                <i class="bi bi-box-arrow-up-right me-1"></i>Abrir documentación API (Swagger)
+            </a>
+        </div>
+    </div>
+</div>

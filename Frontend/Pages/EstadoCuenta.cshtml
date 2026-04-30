@@ -1,0 +1,62 @@
+@page
+@model EstadoCuentaModel
+@{ ViewData["Title"] = "Estado de Cuenta"; }
+
+<h2 class="mb-4"><i class="bi bi-person-lines-fill text-info me-2"></i>Estado de Cuenta</h2>
+
+<div class="card p-4 mb-4" style="max-width:500px;">
+    <form method="get">
+        <div class="mb-3">
+            <label class="form-label fw-bold">NIT del cliente (dejar vacío para todos)</label>
+            <input type="text" name="nit" value="@Model.NitBuscado"
+                   class="form-control" placeholder="Ej: 1234567-8"/>
+        </div>
+        <button type="submit" class="btn btn-info text-white">
+            <i class="bi bi-search me-1"></i>Consultar
+        </button>
+    </form>
+</div>
+
+@if (Model.Clientes != null && Model.Clientes.Any())
+{
+    @foreach (var c in Model.Clientes)
+    {
+        <div class="card mb-4 p-4">
+            <h5><i class="bi bi-person-circle me-2 text-primary"></i>
+                Cliente: @c.NIT — @c.Nombre</h5>
+            <div class="row">
+                <div class="col-auto">
+                    <span class="badge @(c.SaldoActual > 0 ? "bg-danger" : "bg-success") fs-6">
+                        Saldo pendiente: Q. @c.SaldoActual.ToString("N2")
+                    </span>
+                </div>
+                @if (c.SaldoAFavor > 0)
+                {
+                    <div class="col-auto">
+                        <span class="badge bg-info text-dark fs-6">
+                            Saldo a favor: Q. @c.SaldoAFavor.ToString("N2")
+                        </span>
+                    </div>
+                }
+            </div>
+            <h6 class="mt-3">Transacciones (más recientes primero):</h6>
+            <table class="table table-sm table-striped">
+                <thead><tr><th>Fecha</th><th>Cargo</th><th>Abono</th></tr></thead>
+                <tbody>
+                    @foreach (var t in c.Transacciones)
+                    {
+                        <tr>
+                            <td>@t.Fecha</td>
+                            <td>@(t.Tipo == "cargo"  ? $"Q. {t.Monto:N2} ({t.Descripcion})" : "")</td>
+                            <td>@(t.Tipo == "abono" ? $"Q. {t.Monto:N2} ({t.Descripcion})" : "")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+}
+else if (Model.Buscado)
+{
+    <div class="alert alert-warning">No se encontraron resultados.</div>
+}

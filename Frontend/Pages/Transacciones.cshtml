@@ -1,0 +1,50 @@
+@page
+@model TransaccionesModel
+@{ ViewData["Title"] = "Cargar Transacciones"; }
+
+<h2 class="mb-4"><i class="bi bi-file-earmark-arrow-up-fill text-success me-2"></i>Cargar transac.xml</h2>
+
+<div class="card p-4 mb-4" style="max-width:600px;">
+    <form method="post" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label class="form-label fw-bold">Selecciona el archivo transac.xml</label>
+            <input type="file" name="archivo" accept=".xml" class="form-control" required/>
+        </div>
+        <button type="submit" class="btn btn-success">
+            <i class="bi bi-upload me-1"></i>Cargar y Procesar
+        </button>
+    </form>
+</div>
+
+@if (Model.Respuesta != null)
+{
+    <div class="card p-4" style="max-width:640px;">
+        <h5>Resultado del procesamiento</h5>
+        <table class="table table-bordered mt-3">
+            <thead class="table-success">
+                <tr><th>Entidad</th><th>Nuevas/Nuevos</th><th>Duplicadas/os</th><th>Con Error</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Facturas</td>
+                    <td>@Model.Respuesta.NuevasFacturas</td>
+                    <td>@Model.Respuesta.FacturasDuplicadas</td>
+                    <td>@Model.Respuesta.FacturasConError</td>
+                </tr>
+                <tr>
+                    <td>Pagos</td>
+                    <td>@Model.Respuesta.NuevosPagos</td>
+                    <td>@Model.Respuesta.PagosDuplicados</td>
+                    <td>@Model.Respuesta.PagosConError</td>
+                </tr>
+            </tbody>
+        </table>
+        <h6 class="mt-3">XML de respuesta:</h6>
+        <pre class="xml-response">@Model.RespuestaXml</pre>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="alert alert-danger mt-3">@Model.Error</div>
+}
