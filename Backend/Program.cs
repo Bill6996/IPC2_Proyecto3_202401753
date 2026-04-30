@@ -1,8 +1,11 @@
 using Backend.Services;
+using QuestPDF.Infrastructure;
+
+// Licencia gratuita de QuestPDF (community)
+QuestPDF.Settings.License = LicenseType.Community;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Servicios
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -15,7 +18,6 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// CORS: permite que el Frontend (puerto 5000) llame al Backend (5001)
 builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend", policy =>
         policy.WithOrigins("http://localhost:5000")
@@ -27,6 +29,7 @@ builder.Services.AddSingleton<XmlDataService>();
 builder.Services.AddScoped<ConfigService>();
 builder.Services.AddScoped<TransaccionService>();
 builder.Services.AddScoped<EstadoCuentaService>();
+builder.Services.AddScoped<PdfService>();
 
 var app = builder.Build();
 

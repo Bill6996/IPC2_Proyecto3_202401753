@@ -1,20 +1,42 @@
 @page
 @model ResetModel
-@{ ViewData["Title"] = "Resetear Datos"; }
+@{
+    ViewData["Title"] = "Resetear Datos";
+}
 
-<h2 class="mb-4"><i class="bi bi-arrow-counterclockwise text-danger me-2"></i>Resetear Datos del Sistema</h2>
+<h2 class="mb-4"><i class="bi bi-arrow-counterclockwise text-danger me-2"></i>Resetear Datos</h2>
 
-<div class="card p-4" style="max-width:500px;">
-    <p class="text-muted">Esta acción eliminará <strong>todos</strong> los clientes, bancos, facturas
-       y pagos del sistema. No se puede deshacer.</p>
-    <form method="post">
-        <button type="submit" class="btn btn-danger">
-            <i class="bi bi-trash me-1"></i>Confirmar Reset
-        </button>
-        <a href="/" class="btn btn-secondary ms-2">Cancelar</a>
-    </form>
-    @if (Model.Mensaje != null)
+<div class="card p-4" style="max-width:520px;">
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <strong>¡Atención!</strong> Esta acción eliminará <strong>todos</strong> los
+        clientes, bancos, facturas y pagos. No se puede deshacer.
+    </div>
+
+    @if (!Model.Confirmando)
     {
-        <div class="alert alert-success mt-3">@Model.Mensaje</div>
+        <form method="post" asp-page-handler="Confirmar">
+            <button type="submit" class="btn btn-warning">
+                <i class="bi bi-exclamation-circle me-1"></i>Quiero resetear el sistema
+            </button>
+            <a href="/" class="btn btn-secondary ms-2">Cancelar</a>
+        </form>
+    }
+    else
+    {
+        <p class="fw-bold text-danger">¿Está seguro? Esta acción es irreversible.</p>
+        <form method="post" asp-page-handler="Ejecutar">
+            <button type="submit" class="btn btn-danger">
+                <i class="bi bi-trash me-1"></i>Sí, resetear ahora
+            </button>
+            <a href="/Reset" class="btn btn-secondary ms-2">No, cancelar</a>
+        </form>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.Mensaje))
+    {
+        <div class="alert alert-success mt-3">
+            <i class="bi bi-check-circle me-2"></i>@Model.Mensaje
+        </div>
     }
 </div>

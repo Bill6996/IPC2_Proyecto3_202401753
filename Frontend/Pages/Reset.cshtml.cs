@@ -8,12 +8,22 @@ namespace Frontend.Pages
     {
         private readonly ApiService _api;
         public ResetModel(ApiService api) => _api = api;
-        public string? Mensaje { get; set; }
 
-        public async Task<IActionResult> OnPostAsync()
+        public bool Confirmando { get; set; }
+        public string Mensaje { get; set; } = "";
+
+        public void OnGet() { }
+
+        public IActionResult OnPostConfirmar()
+        {
+            Confirmando = true;
+            return Page();
+        }
+
+        public async Task<IActionResult> OnPostEjecutarAsync()
         {
             await _api.LimpiarDatos();
-            Mensaje = "✅ Sistema reseteado correctamente. Todos los datos han sido eliminados.";
+            Mensaje = "Sistema reseteado correctamente. Todos los datos han sido eliminados.";
             return Page();
         }
     }

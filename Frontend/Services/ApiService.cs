@@ -5,9 +5,7 @@ namespace Frontend.Services
     public class ApiService
     {
         private readonly IHttpClientFactory _factory;
-
         public ApiService(IHttpClientFactory factory) => _factory = factory;
-
         private HttpClient Client() => _factory.CreateClient("Backend");
 
         public async Task<string> GrabarConfiguracion(IFormFile archivo)
@@ -50,6 +48,35 @@ namespace Frontend.Services
         public async Task<string> GetResumenPagos(int mes, int anio)
         {
             var res = await Client().GetAsync($"devolverResumenPagos?mes={mes}&anio={anio}");
+            return await res.Content.ReadAsStringAsync();
+        }
+
+        public async Task<byte[]> DescargarPdfEstadoCuenta(string? nit)
+        {
+            var url = string.IsNullOrWhiteSpace(nit)
+                ? "pdfEstadoCuenta"
+                : $"pdfEstadoCuenta?nit={Uri.EscapeDataString(nit)}";
+            var res = await Client().GetAsync(url);
+            res.EnsureSuccessStatusCode();
+            return await res.Content.ReadAsByteArrayAsync();
+        }
+
+        public async Task<byte[]> DescargarPdfResumenPagos(int mes, int anio)
+        {
+            var res = await Client().GetAsync($"pdfResumenPagos?mes={mes}&anio={anio}");
+            res.EnsureSuccessStatusCode();
+            return await res.Content.ReadAsByteArrayAsync();
+        }
+
+        public async Task<string> GetClientes()
+        {
+            var res = await Client().GetAsync("clientes");
+            return await res.Content.ReadAsStringAsync();
+        }
+
+        public async Task<string> GetBancos()
+        {
+            var res = await Client().GetAsync("bancos");
             return await res.Content.ReadAsStringAsync();
         }
     }

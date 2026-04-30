@@ -1,29 +1,38 @@
 @page
 @model IngresosModel
-@{ ViewData["Title"] = "Ingresos por Banco"; }
+@{
+    ViewData["Title"] = "Ingresos por Banco";
+}
 
 <h2 class="mb-4"><i class="bi bi-bar-chart-fill text-warning me-2"></i>Ingresos por Banco</h2>
 
-<div class="card p-4 mb-4" style="max-width:400px;">
+<div class="card p-4 mb-4" style="max-width:450px;">
     <form method="get">
         <div class="row g-2 align-items-end">
             <div class="col">
                 <label class="form-label fw-bold">Mes</label>
                 <select name="mes" class="form-select">
-                    @for (int m = 1; m <= 12; m++)
-                    {
-                        <option value="@m" selected="@(m == Model.Mes)">
-                            @System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(m)
-                        </option>
+                    @{
+                        var culture = System.Globalization.CultureInfo.GetCultureInfo("es-ES");
+                        for (int m = 1; m <= 12; m++)
+                        {
+                            var name = culture.DateTimeFormat.GetMonthName(m);
+                            <option value="@m" selected="@(m == Model.Mes ? "selected" : null)">
+                                @name
+                            </option>
+                        }
                     }
                 </select>
             </div>
             <div class="col">
                 <label class="form-label fw-bold">Año</label>
-                <input type="number" name="anio" value="@Model.Anio" class="form-control" min="2020" max="2099"/>
+                <input type="number" name="anio" value="@Model.Anio"
+                       class="form-control" min="2020" max="2099" />
             </div>
             <div class="col-auto">
-                <button type="submit" class="btn btn-warning">Ver</button>
+                <button type="submit" class="btn btn-warning fw-bold">
+                    <i class="bi bi-graph-up me-1"></i>Ver
+                </button>
             </div>
         </div>
     </form>
@@ -31,39 +40,122 @@
 
 @if (Model.Datos != null && Model.Datos.Any())
 {
-    <div class="card p-4" style="max-width:800px;">
-        <canvas id="chartIngresos" height="120"></canvas>
+    <div class="mb-3">
+        <a href="/Ingresos/Pdf?mes=@Model.Mes&anio=@Model.Anio"
+               class="btn btn-danger btn-sm" target="_blank">
+            <i class="bi bi-file-earmark-pdf me-1"></i>Descargar PDF
+        </a>
+    </div>
+
+    <div class="card p-4 mb-4" style="max-width:850px;">
+        <h6 class="text-muted mb-3">
+            Ingresos por banco — últimos 3 meses a partir de
+            @System.Globalization.CultureInfo.GetCultureInfo("es-ES")
+            .DateTimeFormat.GetMonthName(Model.Mes)/@Model.Anio
+        </h6>
+        <canvas id="chartIngresos" height="110"></canvas>
+    </div>
+
+    <!-- Tabla resumen -->
+    <div class="card p-4" style="max-width:850px;">
+        <h6 class="text-muted mb-3">Tabla de datos</h6>
+        <table class="table table-bordered table-striped table-sm">
+            <thead style="background:#1a3c5e; color:white;">
+                <tr>
+                    <th>Banco</th>
+                    @foreach (var mes in Model.Datos.First().Meses)
+                    {
+                        var nombreMes = System.Globalization.CultureInfo
+                            .GetCultureInfo("es-ES").DateTimeFormat.GetMonthName(mes.Mes);
+                        <th class="text-center">@nombreMes @mes.Anio</th>
+                    }
+                    <th class="text-end">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var banco in Model.Datos)
+                {
+                    <tr>
+                        <td class="fw-semibold">@banco.Nombre</td>
+                        @foreach (var mes in banco.Meses)
+                        {
+                            <td class="text-center">Q. @mes.Total.ToString("N2")</td>
+                        }
+                        <td class="text-end fw-bold text-primary">
+                            Q. @banco.Meses.Sum(m => m.Total).ToString("N2")
+                        </td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot style="background:#e8f0fe;">
+                <tr>
+                    <td class="fw-bold">TOTAL</td>
+                    @for (int i = 0; i < Model.Datos.First().Meses.Count; i++)
+                    {
+                        var totalCol = Model.Datos.Sum(b => b.Meses[i].Total);
+                        <td class="text-center fw-bold">Q. @totalCol.ToString("N2")</td>
+                    }
+                    <td class="text-end fw-bold text-primary">
+                        Q. @Model.Datos.Sum(b => b.Meses.Sum(m => m.Total)).ToString("N2")
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+}
+else if (Request.Query.ContainsKey("mes"))
+{
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>No hay datos de pagos para ese período.
     </div>
 }
 
 @section Scripts {
-<script>
-const datos  = @Html.Raw(Model.ChartJson ?? "[]");
-if (datos.length > 0) {
-    const labels  = datos.map(d => d.nombre);
-    const meses   = datos[0].meses;
-    const colors  = ['#0d6efd','#fd7e14','#6c757d','#198754','#dc3545'];
+    <script>
+        const datos = @Html.Raw(Model.ChartJson ?? "[]");
+        if (datos.length > 0) {
+            const labels = datos.map(d => d.nombre);
+            const meses = datos[0].meses;
+            const palette = ['#0d6efd', '#fd7e14', '#6c757d', '#198754'];
+            const culture = 'es-ES';
 
-    const datasets = meses.map((m, i) => ({
-        label: `${m.mes.toString().padStart(2,'0')}/${m.anio}`,
-        data : datos.map(b => b.meses[i].total / 1000),
-        backgroundColor: colors[i % colors.length]
-    }));
+            const datasets = meses.map((m, i) => {
+                const label = new Date(m.anio, m.mes - 1, 1)
+                    .toLocaleDateString('es-GT', { month: 'short', year: 'numeric' });
+                return {
+                    label,
+                    data: datos.map(b => (b.meses[i].total / 1000).toFixed(2)),
+                    backgroundColor: palette[i % palette.length],
+                    borderRadius: 4
+                };
+            });
 
-    new Chart(document.getElementById('chartIngresos'), {
-        type: 'bar',
-        data: { labels, datasets },
-        options: {
-            responsive: true,
-            plugins: {
-                title: { display: true,
-                         text: `Ingresos por banco — Miles de Quetzales` }
-            },
-            scales: {
-                y: { title: { display: true, text: 'Miles de Q.' } }
-            }
+            new Chart(document.getElementById('chartIngresos'), {
+                type: 'bar',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: {
+                            display: true,
+                            text: 'Ingresos por banco (Miles de Quetzales)',
+                            font: { size: 14 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => ` Q. ${(ctx.parsed.y * 1000).toLocaleString('es-GT', { minimumFractionDigits: 2 })} (${ctx.dataset.label})`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            title: { display: true, text: 'Miles de Q.' },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
         }
-    });
-}
-</script>
+    </script>
 }

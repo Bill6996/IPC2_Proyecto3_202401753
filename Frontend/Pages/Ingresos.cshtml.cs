@@ -24,9 +24,10 @@ namespace Frontend.Pages
                 var json = await _api.GetResumenPagos(Mes, Anio);
                 var opts = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 Datos = JsonSerializer.Deserialize<List<BancoIngresosVM>>(json, opts) ?? new();
-                ChartJson = JsonSerializer.Serialize(Datos.Select(b => new {
+                ChartJson = JsonSerializer.Serialize(Datos.Select(b => new
+                {
                     nombre = b.Nombre,
-                    meses = b.Meses
+                    meses = b.Meses.Select(m => new { m.Mes, m.Anio, m.Total })
                 }));
             }
         }

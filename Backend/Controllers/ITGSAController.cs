@@ -13,17 +13,20 @@ namespace Backend.Controllers
         private readonly TransaccionService _transacSvc;
         private readonly EstadoCuentaService _estadoSvc;
         private readonly XmlDataService _dataSvc;
+        private readonly PdfService _pdfSvc;
 
         public ITGSAController(
             ConfigService configSvc,
             TransaccionService transacSvc,
             EstadoCuentaService estadoSvc,
-            XmlDataService dataSvc)
+            XmlDataService dataSvc,
+            PdfService pdfSvc)
         {
             _configSvc = configSvc;
             _transacSvc = transacSvc;
             _estadoSvc = estadoSvc;
             _dataSvc = dataSvc;
+            _pdfSvc = pdfSvc;
         }
 
         // ── POST /api/grabarConfiguracion ──────────────────────────────────
@@ -31,25 +34,32 @@ namespace Backend.Controllers
         public async Task<IActionResult> GrabarConfiguracion(IFormFile archivo)
         {
             if (archivo == null || archivo.Length == 0)
-                return BadRequest("No se recibió ningún archivo.");
+                return BadRequest(RespuestaError("No se recibió ningún archivo."));
 
-            string xmlContent;
-            using (var reader = new StreamReader(archivo.OpenReadStream()))
-                xmlContent = await reader.ReadToEndAsync();
+            try
+            {
+                string xmlContent;
+                using (var reader = new StreamReader(archivo.OpenReadStream()))
+                    xmlContent = await reader.ReadToEndAsync();
 
-            var (cc, ca, bc, ba) = _configSvc.ProcesarConfig(xmlContent);
+                var (cc, ca, bc, ba) = _configSvc.ProcesarConfig(xmlContent);
 
-            var respuesta = new XDocument(
-                new XDeclaration("1.0", "utf-8", null),
-                new XElement("respuesta",
-                    new XElement("clientes",
-                        new XElement("creados", cc),
-                        new XElement("actualizados", ca)),
-                    new XElement("bancos",
-                        new XElement("creados", bc),
-                        new XElement("actualizados", ba))));
+                var respuesta = new XDocument(
+                    new XDeclaration("1.0", "utf-8", null),
+                    new XElement("respuesta",
+                        new XElement("clientes",
+                            new XElement("creados", cc),
+                            new XElement("actualizados", ca)),
+                        new XElement("bancos",
+                            new XElement("creados", bc),
+                            new XElement("actualizados", ba))));
 
-            return Content(respuesta.ToString(), "application/xml", Encoding.UTF8);
+                return Content(respuesta.ToString(), "application/xml", Encoding.UTF8);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(RespuestaError(ex.Message));
+            }
         }
 
         // ── POST /api/grabarTransaccion ────────────────────────────────────
@@ -57,27 +67,34 @@ namespace Backend.Controllers
         public async Task<IActionResult> GrabarTransaccion(IFormFile archivo)
         {
             if (archivo == null || archivo.Length == 0)
-                return BadRequest("No se recibió ningún archivo.");
+                return BadRequest(RespuestaError("No se recibió ningún archivo."));
 
-            string xmlContent;
-            using (var reader = new StreamReader(archivo.OpenReadStream()))
-                xmlContent = await reader.ReadToEndAsync();
+            try
+            {
+                string xmlContent;
+                using (var reader = new StreamReader(archivo.OpenReadStream()))
+                    xmlContent = await reader.ReadToEndAsync();
 
-            var (nf, fd, fe, np, pd, pe) = _transacSvc.ProcesarTransacciones(xmlContent);
+                var (nf, fd, fe, np, pd, pe) = _transacSvc.ProcesarTransacciones(xmlContent);
 
-            var respuesta = new XDocument(
-                new XDeclaration("1.0", "utf-8", null),
-                new XElement("transacciones",
-                    new XElement("facturas",
-                        new XElement("nuevasFacturas", nf),
-                        new XElement("facturasDuplicadas", fd),
-                        new XElement("facturasConError", fe)),
-                    new XElement("pagos",
-                        new XElement("nuevosPagos", np),
-                        new XElement("pagosDuplicados", pd),
-                        new XElement("pagosConError", pe))));
+                var respuesta = new XDocument(
+                    new XDeclaration("1.0", "utf-8", null),
+                    new XElement("transacciones",
+                        new XElement("facturas",
+                            new XElement("nuevasFacturas", nf),
+                            new XElement("facturasDuplicadas", fd),
+                            new XElement("facturasConError", fe)),
+                        new XElement("pagos",
+                            new XElement("nuevosPagos", np),
+                            new XElement("pagosDuplicados", pd),
+                            new XElement("pagosConError", pe))));
 
-            return Content(respuesta.ToString(), "application/xml", Encoding.UTF8);
+                return Content(respuesta.ToString(), "application/xml", Encoding.UTF8);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(RespuestaError(ex.Message));
+            }
         }
 
         // ── POST /api/limipiarDatos ────────────────────────────────────────
@@ -85,10 +102,14 @@ namespace Backend.Controllers
         public IActionResult LimpiarDatos()
         {
             _dataSvc.LimpiarTodo();
-            return Ok(new { mensaje = "Sistema reiniciado correctamente." });
+            var respuesta = new XDocument(
+                new XDeclaration("1.0", "utf-8", null),
+                new XElement("respuesta",
+                    new XElement("mensaje", "Sistema reiniciado correctamente.")));
+            return Content(respuesta.ToString(), "application/xml", Encoding.UTF8);
         }
 
-        // ── GET /api/devolverEstadoCuenta?nit=xxx  (nit es opcional) ──────
+        // ── GET /api/devolverEstadoCuenta?nit=xxx ─────────────────────────
         [HttpGet("devolverEstadoCuenta")]
         public IActionResult DevolverEstadoCuenta([FromQuery] string? nit)
         {
@@ -103,5 +124,79 @@ namespace Backend.Controllers
             var resultado = _estadoSvc.GetResumenPagos(mes, anio);
             return Ok(resultado);
         }
+
+        // ── GET /api/pdfEstadoCuenta?nit=xxx ──────────────────────────────
+        [HttpGet("pdfEstadoCuenta")]
+        public IActionResult PdfEstadoCuenta([FromQuery] string? nit)
+        {
+            try
+            {
+                var bytes = _pdfSvc.GenerarEstadoCuentaPdf(nit);
+                return File(bytes, "application/pdf",
+                    $"EstadoCuenta_{nit ?? "todos"}_{DateTime.Now:yyyyMMdd}.pdf");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(RespuestaError(ex.Message));
+            }
+        }
+
+        // ── GET /api/pdfResumenPagos?mes=3&anio=2024 ──────────────────────
+        [HttpGet("pdfResumenPagos")]
+        public IActionResult PdfResumenPagos([FromQuery] int mes, [FromQuery] int anio)
+        {
+            try
+            {
+                var bytes = _pdfSvc.GenerarResumenPagosPdf(mes, anio);
+                return File(bytes, "application/pdf",
+                    $"ResumenPagos_{mes:D2}_{anio}.pdf");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(RespuestaError(ex.Message));
+            }
+        }
+
+        // ── GET /api/clientes ─────────────────────────────────────────────
+        [HttpGet("clientes")]
+        public IActionResult GetClientes()
+        {
+            var clientes = _dataSvc.GetClientes().OrderBy(c => c.NIT);
+            return Ok(clientes);
+        }
+
+        // ── GET /api/bancos ───────────────────────────────────────────────
+        [HttpGet("bancos")]
+        public IActionResult GetBancos()
+        {
+            var bancos = _dataSvc.GetBancos().OrderBy(b => b.Codigo);
+            return Ok(bancos);
+        }
+
+        // ── GET /api/facturas?nit=xxx ─────────────────────────────────────
+        [HttpGet("facturas")]
+        public IActionResult GetFacturas([FromQuery] string? nit)
+        {
+            var facturas = _dataSvc.GetFacturas()
+                .Where(f => string.IsNullOrWhiteSpace(nit) || f.NITcliente == nit.ToUpper().Trim())
+                .OrderBy(f => f.Fecha)
+                .ToList();
+            return Ok(facturas);
+        }
+
+        // ── GET /api/pagos?nit=xxx ────────────────────────────────────────
+        [HttpGet("pagos")]
+        public IActionResult GetPagos([FromQuery] string? nit)
+        {
+            var pagos = _dataSvc.GetPagos()
+                .Where(p => string.IsNullOrWhiteSpace(nit) || p.NITcliente == nit.ToUpper().Trim())
+                .OrderBy(p => p.Fecha)
+                .ToList();
+            return Ok(pagos);
+        }
+
+        // ─────────────────────────────────────────────────────────────────
+        private static string RespuestaError(string mensaje) =>
+            $"<?xml version=\"1.0\"?><error><mensaje>{mensaje}</mensaje></error>";
     }
 }
