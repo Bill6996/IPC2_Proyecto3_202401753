@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<config>
+	<clientes>
+		<cliente>
+			<NIT>399399-K</NIT>
+			<nombre>Almacén Guatemalteco Actualizado</nombre>
+		</cliente>
+		<cliente>
+			<NIT>777888-9</NIT>
+			<nombre>Supermercado La Unión</nombre>
+		</cliente>
+	</clientes>
+	<bancos>
+		<banco>
+			<codigo>5</codigo>
+			<nombre>Banrural Xela</nombre>
+		</banco>
+		<banco>
+			<codigo>1</codigo>
+			<nombre>BI Actualizado</nombre>
+		</banco>
+	</bancos>
+</config>

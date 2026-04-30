@@ -1,0 +1,147 @@
+﻿@page
+@model Frontend.Pages.Ayuda.DocumentacionModel
+@{
+    ViewData["Title"] = "Documentación";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-file-earmark-text text-primary me-2"></i>Documentación Técnica</h2>
+    <a href="/Ayuda" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Volver a Ayuda
+    </a>
+</div>
+
+<div class="row g-4">
+
+    <div class="col-12">
+        <div class="card p-4">
+            <h5 class="text-primary mb-3">
+                <i class="bi bi-layers me-2"></i>Diagrama de Capas del Sistema
+            </h5>
+            <div class="d-flex flex-wrap gap-3 justify-content-center py-3">
+                @{
+                    var capas = new[]
+                    {
+                        ("Frontend (Razor Pages :5000)", "primary",   "bi-display",
+                         "Interfaz de usuario web. Consume el API via HTTP."),
+                        ("HTTP / REST API",               "secondary", "bi-arrow-left-right",
+                         "Protocolo de comunicación. JSON y XML."),
+                        ("Backend (API .NET :5001)",      "success",   "bi-server",
+                         "Controladores, Servicios, Modelos POO."),
+                        ("Persistencia XML",              "warning",   "bi-file-earmark-code",
+                         "clientes.xml, bancos.xml, facturas.xml, pagos.xml")
+                    };
+                    foreach (var (titulo, color, icon, desc) in capas)
+                    {
+                        <div class="card border-@color p-3 text-center" style="width:200px;">
+                            <i class="bi @icon fs-2 text-@color mb-2"></i>
+                            <div class="fw-bold small">@titulo</div>
+                            <div class="text-muted" style="font-size:.75rem;">@desc</div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card p-4 h-100">
+            <h5 class="text-success mb-3">
+                <i class="bi bi-diagram-2 me-2"></i>Modelos (Clases POO)
+            </h5>
+            @{
+                var clases = new[]
+                {
+                    ("Cliente",    new[]{ "NIT: string", "Nombre: string", "SaldoAFavor: double" }),
+                    ("Banco",      new[]{ "Codigo: int", "Nombre: string" }),
+                    ("Factura",    new[]{ "NumeroFactura: string", "NITcliente: string",
+                                         "Fecha: string", "Valor: double", "SaldoPendiente: double" }),
+                    ("Pago",       new[]{ "CodigoBanco: int", "NITcliente: string",
+                                         "Fecha: string", "Valor: double" })
+                };
+            }
+            @foreach (var (nombre, props) in clases)
+            {
+                <div class="mb-3 border rounded p-2">
+                    <div class="fw-bold text-success mb-1">
+                        <i class="bi bi-braces me-1"></i>@nombre
+                    </div>
+                    @foreach (var p in props)
+                    {
+                        <div class="small text-muted ps-3">• @p</div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card p-4 h-100">
+            <h5 class="text-info mb-3">
+                <i class="bi bi-gear-wide-connected me-2"></i>Servicios (Backend)
+            </h5>
+            @{
+                var servicios = new[]
+                {
+                    ("XmlDataService",      "Singleton", "Lectura/escritura de todos los archivos XML de persistencia."),
+                    ("ConfigService",       "Scoped",    "Procesa config.xml. Crea o actualiza clientes y bancos."),
+                    ("TransaccionService",  "Scoped",    "Procesa transac.xml. Aplica lógica de pagos y saldo a favor."),
+                    ("EstadoCuentaService", "Scoped",    "Genera estado de cuenta y resumen de ingresos por banco."),
+                    ("PdfService",          "Scoped",    "Genera PDFs de estado de cuenta e ingresos con QuestPDF.")
+                };
+            }
+            @foreach (var (nombre, lifetime, desc) in servicios)
+            {
+                <div class="mb-3 border rounded p-2">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="fw-bold text-info">
+                            <i class="bi bi-wrench me-1"></i>@nombre
+                        </span>
+                        <span class="badge bg-secondary" style="font-size:.7rem;">@lifetime</span>
+                    </div>
+                    <div class="small text-muted">@desc</div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card p-4">
+            <h5 class="text-warning mb-3">
+                <i class="bi bi-regex me-2"></i>Expresiones Regulares utilizadas
+            </h5>
+            <table class="table table-sm table-bordered mb-0">
+                <thead style="background:#1a3c5e; color:white;">
+                    <tr><th>Regex</th><th>Uso</th><th>Ejemplo de entrada</th><th>Resultado</th></tr>
+                </thead>
+                <tbody class="small font-monospace">
+                    <tr>
+                        <td><code>\b(\d{2}/\d{2}/\d{4})\b</code></td>
+                        <td>Extraer fecha de texto con ruido</td>
+                        <td>"Guatemala 15/03/2024 ciudad"</td>
+                        <td>15/03/2024</td>
+                    </tr>
+                    <tr>
+                        <td><code>[^a-zA-Z0-9\-]</code></td>
+                        <td>Limpiar NIT de caracteres inválidos</td>
+                        <td>"  399 399-K  !"</td>
+                        <td>399399-K</td>
+                    </tr>
+                    <tr>
+                        <td><code>[^\d.,]</code></td>
+                        <td>Limpiar valores numéricos</td>
+                        <td>"Q. 1,500.00 GTQ"</td>
+                        <td>1500.00</td>
+                    </tr>
+                    <tr>
+                        <td><code>\s+</code></td>
+                        <td>Normalizar espacios en texto</td>
+                        <td>"Tienda   La   Paz"</td>
+                        <td>Tienda La Paz</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>

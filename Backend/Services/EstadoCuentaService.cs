@@ -6,7 +6,6 @@ namespace Backend.Services
     public class EstadoCuentaService
     {
         private readonly XmlDataService _data;
-
         public EstadoCuentaService(XmlDataService data) => _data = data;
 
         public object GetEstadoCuenta(string? nit)
@@ -17,8 +16,10 @@ namespace Backend.Services
             var bancos = _data.GetBancos();
 
             var clientesFiltrados = string.IsNullOrWhiteSpace(nit)
-                ? clientes.OrderBy(c => c.NIT)
-                : clientes.Where(c => c.NIT == nit.Trim().ToUpper());
+                ? clientes.OrderBy(c => c.NIT).ToList()
+                : clientes.Where(c =>
+                    c.NIT.Equals(nit.Trim().ToUpper(),
+                    StringComparison.OrdinalIgnoreCase)).ToList();
 
             var resultado = new List<object>();
 
@@ -26,15 +27,20 @@ namespace Backend.Services
             {
                 var transacciones = new List<object>();
 
+                // Agregar facturas como cargos
                 foreach (var f in facturas.Where(f => f.NITcliente == cliente.NIT))
+                {
                     transacciones.Add(new
                     {
                         f.Fecha,
                         Tipo = "cargo",
-                        Descripcion = $"Fact. # {f.NumeroFactura}",
-                        Monto = f.Valor
+                        Descripcion = f.NumeroFactura,
+                        Monto = f.Valor,
+                        Pendiente = f.SaldoPendiente
                     });
+                }
 
+                // Agregar pagos como abonos
                 foreach (var p in pagos.Where(p => p.NITcliente == cliente.NIT))
                 {
                     var banco = bancos.FirstOrDefault(b => b.Codigo == p.CodigoBanco);
@@ -42,16 +48,18 @@ namespace Backend.Services
                     {
                         p.Fecha,
                         Tipo = "abono",
-                        Descripcion = banco?.Nombre ?? p.CodigoBanco.ToString(),
-                        Monto = p.Valor
+                        Descripcion = banco?.Nombre ?? $"Banco {p.CodigoBanco}",
+                        Monto = p.Valor,
+                        Pendiente = 0.0
                     });
                 }
 
+                // Ordenar de más reciente a más antigua
                 var ordenadas = transacciones
-                    .OrderByDescending(t => {
+                    .OrderByDescending(t =>
+                    {
                         dynamic d = t;
-                        return DateTime.TryParseExact((string)d.Fecha, "dd/MM/yyyy",
-                            CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dt)
+                        return TransaccionService.TryParseFecha((string)d.Fecha, out var dt)
                             ? dt : DateTime.MinValue;
                     }).ToList();
 
@@ -63,8 +71,10 @@ namespace Backend.Services
                 {
                     cliente.NIT,
                     cliente.Nombre,
-                    SaldoActual = saldoDeuda,
-                    SaldoAFavor = cliente.SaldoAFavor,
+                    SaldoActual = Math.Round(saldoDeuda, 2),
+                    SaldoAFavor = Math.Round(cliente.SaldoAFavor, 2),
+                    TotalFacturas = facturas.Count(f => f.NITcliente == cliente.NIT),
+                    TotalPagos = pagos.Count(p => p.NITcliente == cliente.NIT),
                     Transacciones = ordenadas
                 });
             }
@@ -90,21 +100,22 @@ namespace Backend.Services
 
             foreach (var banco in bancos)
             {
-                var detalle = meses.Select(x => {
+                var detalle = meses.Select(x =>
+                {
                     double total = pagos
-                        .Where(p => p.CodigoBanco == banco.Codigo)
-                        .Where(p => DateTime.TryParseExact(p.Fecha, "dd/MM/yyyy",
-                            CultureInfo.InvariantCulture, DateTimeStyles.None, out var d)
+                        .Where(p => p.CodigoBanco == banco.Codigo
+                            && TransaccionService.TryParseFecha(p.Fecha, out var d)
                             && d.Month == x.m && d.Year == x.a)
                         .Sum(p => p.Valor);
-                    return new { Mes = x.m, Anio = x.a, Total = total };
+                    return new { Mes = x.m, Anio = x.a, Total = Math.Round(total, 2) };
                 }).ToList();
 
                 resultado.Add(new
                 {
                     banco.Codigo,
                     banco.Nombre,
-                    Meses = detalle
+                    Meses = detalle,
+                    TotalBanco = Math.Round(detalle.Sum(d => d.Total), 2)
                 });
             }
 

@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<transacciones>
+	<facturas>
+		<factura>
+			<numeroFactura>FACT-009</numeroFactura>
+			<NITcliente>987654-3</NITcliente>
+			<fecha>05/04/2024</fecha>
+			<valor>800.00</valor>
+		</factura>
+		<factura>
+			<numeroFactura>FACT-010</numeroFactura>
+			<NITcliente>123456-7</NITcliente>
+			<fecha>12/04/2024</fecha>
+			<valor>500.00</valor>
+		</factura>
+	</facturas>
+	<pagos>
+		<pago>
+			<codigoBanco>1</codigoBanco>
+			<fecha>10/04/2024</fecha>
+			<NITcliente>987654-3</NITcliente>
+			<valor>1500.00</valor>
+		</pago>
+	</pagos>
+</transacciones>

@@ -1,36 +1,189 @@
 @page
 @model AyudaModel
-@{ ViewData["Title"] = "Ayuda"; }
+@{
+    ViewData["Title"] = "Ayuda";
+}
 
 <h2 class="mb-4"><i class="bi bi-question-circle-fill text-secondary me-2"></i>Ayuda</h2>
 
-<div class="row g-4">
-    <div class="col-md-6">
-        <div class="card p-4">
-            <h5><i class="bi bi-person-badge me-2 text-primary"></i>Información del Estudiante</h5>
-            <table class="table table-borderless mt-3">
-                <tr><td class="fw-bold">Nombre:</td><td>[Tu nombre completo]</td></tr>
-                <tr><td class="fw-bold">Carnet:</td><td>202401753</td></tr>
-                <tr><td class="fw-bold">Curso:</td><td>Introducción a la Programación y Computación 2</td></tr>
-                <tr><td class="fw-bold">Universidad:</td><td>Universidad de San Carlos de Guatemala</td></tr>
-                <tr><td class="fw-bold">Facultad:</td><td>Ingeniería — Ciencias y Sistemas</td></tr>
+<ul class="nav nav-tabs mb-4" id="ayudaTabs">
+    <li class="nav-item">
+        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-estudiante">
+            <i class="bi bi-person-badge me-2"></i>Información del Estudiante
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-manual">
+            <i class="bi bi-book me-2"></i>Manual del Sistema
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content">
+
+    <!-- TAB 1: Estudiante -->
+    <div class="tab-pane fade show active" id="tab-estudiante">
+        <div class="card p-4" style="max-width:600px;">
+            <div class="d-flex align-items-center mb-4">
+                <div class="rounded-circle d-flex align-items-center justify-content-center me-3"
+                     style="width:64px;height:64px;background:#1a3c5e;">
+                    <i class="bi bi-mortarboard-fill text-white fs-3"></i>
+                </div>
+                <div>
+                    <h5 class="mb-0">Información del Estudiante</h5>
+                    <small class="text-muted">IPC2 — Proyecto No. 3</small>
+                </div>
+            </div>
+            <table class="table table-borderless">
+                <tbody>
+                    <tr>
+                        <td class="fw-bold text-muted" style="width:180px;">
+                            <i class="bi bi-person me-2"></i>Nombre:
+                        </td>
+                        <td>[Tu nombre completo aquí]</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold text-muted">
+                            <i class="bi bi-card-text me-2"></i>Carnet:
+                        </td>
+                        <td>202401753</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold text-muted">
+                            <i class="bi bi-book me-2"></i>Curso:
+                        </td>
+                        <td>Introducción a la Programación y Computación 2</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold text-muted">
+                            <i class="bi bi-building me-2"></i>Facultad:
+                        </td>
+                        <td>Ingeniería — Ciencias y Sistemas</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold text-muted">
+                            <i class="bi bi-bank me-2"></i>Universidad:
+                        </td>
+                        <td>Universidad de San Carlos de Guatemala</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold text-muted">
+                            <i class="bi bi-github me-2"></i>Repositorio:
+                        </td>
+                        <td>
+                            <a href="https://github.com/[TU_USUARIO]/IPC2_Proyecto3_202401753"
+                                   target="_blank" class="text-decoration-none">
+                                IPC2_Proyecto3_202401753
+                                <i class="bi bi-box-arrow-up-right ms-1"></i>
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
             </table>
+
+            <hr />
+            <h6>Catedráticos e instructores</h6>
+            <ul class="list-unstyled small text-muted">
+                <li><i class="bi bi-person-fill me-2 text-primary"></i>Inga. Claudia Liceth Rojas Morales</li>
+                <li><i class="bi bi-person-fill me-2 text-primary"></i>Ing. Marlon Antonio Pérez Türk</li>
+                <li><i class="bi bi-person-fill me-2 text-primary"></i>Ing. José Manuel Ruiz Juárez</li>
+                <li><i class="bi bi-person-fill me-2 text-primary"></i>Ing. Dennis Stanley Barrios González</li>
+                <li><i class="bi bi-person-fill me-2 text-primary"></i>Ing. Edwin Estuardo Zapeta Gómez</li>
+                <li><i class="bi bi-person-fill me-2 text-primary"></i>Ing. Fernando José Paz González</li>
+            </ul>
         </div>
     </div>
-    <div class="col-md-6">
-        <div class="card p-4">
-            <h5><i class="bi bi-file-earmark-text me-2 text-success"></i>Documentación del Sistema</h5>
-            <p>Este sistema gestiona la facturación y pagos de <strong>ITGSA</strong>.</p>
-            <ul>
-                <li><strong>config.xml</strong>: registra clientes y bancos.</li>
-                <li><strong>transac.xml</strong>: registra facturas y pagos.</li>
-                <li>Los pagos se aplican a la factura más antigua primero.</li>
-                <li>El excedente de pago queda como saldo a favor del cliente.</li>
-                <li>El saldo a favor se aplica automáticamente en la próxima compra.</li>
-            </ul>
-            <a href="http://localhost:5001/swagger" target="_blank" class="btn btn-outline-success btn-sm mt-2">
-                <i class="bi bi-box-arrow-up-right me-1"></i>Abrir documentación API (Swagger)
-            </a>
+
+    <!-- TAB 2: Manual -->
+    <div class="tab-pane fade" id="tab-manual">
+        <div class="row g-4">
+
+            <div class="col-md-6">
+                <div class="card p-4 h-100">
+                    <h5><i class="bi bi-diagram-3 me-2 text-primary"></i>Arquitectura del sistema</h5>
+                    <p class="text-muted small">El sistema se compone de dos programas:</p>
+                    <ul class="small">
+                        <li><strong>Backend (puerto 5001):</strong> API REST en .NET que almacena datos en archivos XML y expone endpoints HTTP.</li>
+                        <li><strong>Frontend (puerto 5000):</strong> Aplicación web Razor Pages que consume el API.</li>
+                    </ul>
+                    <a href="http://localhost:5001/swagger" target="_blank"
+                           class="btn btn-outline-primary btn-sm mt-2">
+                        <i class="bi bi-code-slash me-1"></i>Ver documentación Swagger
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card p-4 h-100">
+                    <h5><i class="bi bi-file-earmark-code me-2 text-success"></i>Archivos de entrada</h5>
+                    <div class="mb-3">
+                        <span class="badge bg-success mb-1">config.xml</span>
+                        <p class="small text-muted mb-1">Registra o actualiza clientes y bancos. Es incremental: se pueden cargar múltiples veces. Si el NIT o código de banco ya existe, se actualiza el nombre.</p>
+                    </div>
+                    <div>
+                        <span class="badge bg-primary mb-1">transac.xml</span>
+                        <p class="small text-muted mb-0">Registra facturas y pagos. No permite duplicados: si una factura ya existe con el mismo número se cuenta como duplicada.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card p-4 h-100">
+                    <h5><i class="bi bi-cash-coin me-2 text-warning"></i>Lógica de pagos</h5>
+                    <ol class="small text-muted">
+                        <li class="mb-1">El cliente realiza un pago a través de su banca en línea.</li>
+                        <li class="mb-1">El pago se aplica a la <strong>factura más antigua</strong> del cliente primero.</li>
+                        <li class="mb-1">Si el pago excede el total de facturas pendientes, el excedente se registra como <strong>saldo a favor</strong>.</li>
+                        <li class="mb-1">El saldo a favor se aplica automáticamente en la <strong>próxima factura</strong> que genere el cliente.</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card p-4 h-100">
+                    <h5><i class="bi bi-exclamation-triangle me-2 text-danger"></i>Errores y validaciones</h5>
+                    <ul class="small text-muted">
+                        <li>Factura con NIT de cliente inexistente → <strong>error</strong></li>
+                        <li>Factura con número repetido → <strong>duplicada</strong></li>
+                        <li>Pago con código de banco inexistente → <strong>error</strong></li>
+                        <li>Pago con NIT de cliente inexistente → <strong>error</strong></li>
+                        <li>Pago idéntico (mismo banco, cliente, fecha y monto) → <strong>duplicado</strong></li>
+                        <li>Fechas con texto extra son procesadas con regex extrayendo dd/mm/yyyy</li>
+                        <li>NITs con espacios o caracteres extra son limpiados automáticamente</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="card p-4">
+                    <h5><i class="bi bi-hdd-network me-2 text-info"></i>Endpoints disponibles en el API</h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered mb-0">
+                            <thead style="background:#1a3c5e; color:white;">
+                                <tr>
+                                    <th>Método</th>
+                                    <th>Endpoint</th>
+                                    <th>Descripción</th>
+                                </tr>
+                            </thead>
+                            <tbody class="small">
+                                <tr><td><span class="badge bg-success">POST</span></td><td>/api/grabarConfiguracion</td><td>Carga archivo config.xml</td></tr>
+                                <tr><td><span class="badge bg-success">POST</span></td><td>/api/grabarTransaccion</td><td>Carga archivo transac.xml</td></tr>
+                                <tr><td><span class="badge bg-warning text-dark">POST</span></td><td>/api/limipiarDatos</td><td>Resetea todos los datos</td></tr>
+                                <tr><td><span class="badge bg-primary">GET</span></td><td>/api/devolverEstadoCuenta?nit=</td><td>Estado de cuenta por NIT o todos</td></tr>
+                                <tr><td><span class="badge bg-primary">GET</span></td><td>/api/devolverResumenPagos?mes=&anio=</td><td>Resumen de ingresos por banco</td></tr>
+                                <tr><td><span class="badge bg-primary">GET</span></td><td>/api/pdfEstadoCuenta?nit=</td><td>PDF del estado de cuenta</td></tr>
+                                <tr><td><span class="badge bg-primary">GET</span></td><td>/api/pdfResumenPagos?mes=&anio=</td><td>PDF del resumen de pagos</td></tr>
+                                <tr><td><span class="badge bg-primary">GET</span></td><td>/api/clientes</td><td>Lista todos los clientes</td></tr>
+                                <tr><td><span class="badge bg-primary">GET</span></td><td>/api/bancos</td><td>Lista todos los bancos</td></tr>
+                                <tr><td><span class="badge bg-primary">GET</span></td><td>/api/facturas?nit=</td><td>Lista facturas (filtrable por NIT)</td></tr>
+                                <tr><td><span class="badge bg-primary">GET</span></td><td>/api/pagos?nit=</td><td>Lista pagos (filtrable por NIT)</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>

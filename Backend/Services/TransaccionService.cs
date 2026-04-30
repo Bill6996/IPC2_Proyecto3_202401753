@@ -25,33 +25,34 @@ namespace Backend.Services
             // ── Procesar Facturas ──────────────────────────────────────────
             foreach (var el in doc.Descendants("factura"))
             {
-                var numeroFactura = el.Element("numeroFactura")?.Value?.Trim() ?? "";
-                var nitCliente = ConfigService.LimpiarNIT(el.Element("NITcliente")?.Value?.Trim() ?? "");
+                var numeroFactura = LimpiarTexto(el.Element("numeroFactura")?.Value ?? "");
+                var nitRaw = el.Element("NITcliente")?.Value?.Trim() ?? "";
+                var nitCliente = ConfigService.LimpiarNIT(nitRaw);
                 var fechaStr = ExtraerFecha(el.Element("fecha")?.Value?.Trim() ?? "");
-                var valorStr = el.Element("valor")?.Value?.Trim() ?? "";
+                var valorStr = LimpiarNumero(el.Element("valor")?.Value?.Trim() ?? "");
 
-                if (string.IsNullOrEmpty(numeroFactura) || string.IsNullOrEmpty(nitCliente))
-                { fe++; continue; }
+                // Validar número de factura
+                if (string.IsNullOrWhiteSpace(numeroFactura)) { fe++; continue; }
 
-                // Factura duplicada
-                if (facturas.Any(f => f.NumeroFactura == numeroFactura))
-                { fd++; continue; }
+                // Validar NIT
+                if (string.IsNullOrWhiteSpace(nitCliente)) { fe++; continue; }
+
+                // Factura duplicada — verificar antes de validar cliente
+                if (facturas.Any(f => f.NumeroFactura == numeroFactura)) { fd++; continue; }
 
                 // Cliente no existe
                 var cliente = clientes.FirstOrDefault(c => c.NIT == nitCliente);
                 if (cliente == null) { fe++; continue; }
 
                 // Fecha inválida
-                if (!DateTime.TryParseExact(fechaStr, "dd/MM/yyyy",
-                    CultureInfo.InvariantCulture, DateTimeStyles.None, out _))
-                { fe++; continue; }
+                if (!TryParseFecha(fechaStr, out _)) { fe++; continue; }
 
                 // Valor inválido
                 if (!double.TryParse(valorStr, NumberStyles.Any,
                     CultureInfo.InvariantCulture, out double valor) || valor <= 0)
                 { fe++; continue; }
 
-                // Aplicar saldo a favor del cliente si tiene
+                // Aplicar saldo a favor del cliente
                 double saldoPendiente = valor;
                 if (cliente.SaldoAFavor > 0)
                 {
@@ -74,37 +75,41 @@ namespace Backend.Services
             // ── Procesar Pagos ─────────────────────────────────────────────
             foreach (var el in doc.Descendants("pago"))
             {
-                var codigoStr = el.Element("codigoBanco")?.Value?.Trim() ?? "";
+                var codigoStr = LimpiarNumero(el.Element("codigoBanco")?.Value?.Trim() ?? "");
                 var fechaStr = ExtraerFecha(el.Element("fecha")?.Value?.Trim() ?? "");
-                var nitCliente = ConfigService.LimpiarNIT(el.Element("NITcliente")?.Value?.Trim() ?? "");
-                var valorStr = el.Element("valor")?.Value?.Trim() ?? "";
+                var nitRaw = el.Element("NITcliente")?.Value?.Trim() ?? "";
+                var nitCliente = ConfigService.LimpiarNIT(nitRaw);
+                var valorStr = LimpiarNumero(el.Element("valor")?.Value?.Trim() ?? "");
 
+                // Validar código banco
                 if (!int.TryParse(codigoStr, out int codigoBanco)) { pe++; continue; }
                 if (bancos.All(b => b.Codigo != codigoBanco)) { pe++; continue; }
 
+                // Validar cliente
                 var cliente = clientes.FirstOrDefault(c => c.NIT == nitCliente);
                 if (cliente == null) { pe++; continue; }
 
-                if (!DateTime.TryParseExact(fechaStr, "dd/MM/yyyy",
-                    CultureInfo.InvariantCulture, DateTimeStyles.None, out _))
-                { pe++; continue; }
+                // Validar fecha
+                if (!TryParseFecha(fechaStr, out _)) { pe++; continue; }
 
+                // Validar valor
                 if (!double.TryParse(valorStr, NumberStyles.Any,
                     CultureInfo.InvariantCulture, out double valor) || valor <= 0)
                 { pe++; continue; }
 
-                // Pago duplicado (mismo banco + cliente + fecha + monto)
+                // Pago duplicado
                 if (pagos.Any(p => p.CodigoBanco == codigoBanco
                     && p.NITcliente == nitCliente
                     && p.Fecha == fechaStr
-                    && p.Valor == valor))
+                    && Math.Abs(p.Valor - valor) < 0.001))
                 { pd++; continue; }
 
                 // Abonar a facturas más antiguas primero
                 double resto = valor;
                 var facturasCliente = facturas
-                    .Where(f => f.NITcliente == nitCliente && f.SaldoPendiente > 0)
-                    .OrderBy(f => DateTime.ParseExact(f.Fecha, "dd/MM/yyyy", CultureInfo.InvariantCulture))
+                    .Where(f => f.NITcliente == nitCliente && f.SaldoPendiente > 0.001)
+                    .OrderBy(f => DateTime.ParseExact(
+                        f.Fecha, "dd/MM/yyyy", CultureInfo.InvariantCulture))
                     .ToList();
 
                 foreach (var factura in facturasCliente)
@@ -115,8 +120,8 @@ namespace Backend.Services
                     resto -= aplicado;
                 }
 
-                // Si sobró dinero → saldo a favor del cliente
-                if (resto > 0)
+                // Sobró → saldo a favor
+                if (resto > 0.001)
                     cliente.SaldoAFavor += resto;
 
                 pagos.Add(new Pago
@@ -136,11 +141,32 @@ namespace Backend.Services
             return (nf, fd, fe, np, pd, pe);
         }
 
-        // Expresión regular: extrae el patrón dd/mm/yyyy de cualquier texto
-        private static string ExtraerFecha(string texto)
+        // ── Helpers con Regex ──────────────────────────────────────────────
+
+        // Extrae dd/mm/yyyy de cualquier string que pueda tener texto extra
+        public static string ExtraerFecha(string texto)
         {
-            var match = Regex.Match(texto, @"\d{2}/\d{2}/\d{4}");
-            return match.Success ? match.Value : texto;
+            var match = Regex.Match(texto, @"\b(\d{2}/\d{2}/\d{4})\b");
+            return match.Success ? match.Value : texto.Trim();
         }
+
+        // Extrae solo dígitos y punto decimal de un valor numérico
+        public static string LimpiarNumero(string texto)
+        {
+            // Elimina todo excepto dígitos, punto y coma decimal
+            var limpio = Regex.Replace(texto, @"[^\d.,]", "");
+            // Si usa coma como decimal, la convierte a punto
+            limpio = Regex.Replace(limpio, @",(\d{1,2})$", ".$1");
+            return limpio;
+        }
+
+        // Limpia espacios y caracteres no imprimibles del texto
+        public static string LimpiarTexto(string texto) =>
+            Regex.Replace(texto.Trim(), @"\s+", " ");
+
+        // Intenta parsear fecha en formato dd/MM/yyyy
+        public static bool TryParseFecha(string fecha, out DateTime result) =>
+            DateTime.TryParseExact(fecha, "dd/MM/yyyy",
+                CultureInfo.InvariantCulture, DateTimeStyles.None, out result);
     }
 }

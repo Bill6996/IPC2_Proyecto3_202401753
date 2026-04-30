@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<config>
+	<clientes>
+		<cliente>
+			<NIT>399399-K</NIT>
+			<nombre>Almacén Guatemalteco</nombre>
+		</cliente>
+		<cliente>
+			<NIT>123456-7</NIT>
+			<nombre>Tienda La Esperanza</nombre>
+		</cliente>
+		<cliente>
+			<NIT>987654-3</NIT>
+			<nombre>Distribuidora El Sol</nombre>
+		</cliente>
+		<cliente>
+			<NIT>111222-5</NIT>
+			<nombre>Comercial Xela</nombre>
+		</cliente>
+		<cliente>
+			<NIT>  555666-8  </NIT>
+			<nombre>Ferretería Central Guatemala Ciudad</nombre>
+		</cliente>
+	</clientes>
+	<bancos>
+		<banco>
+			<codigo>1</codigo>
+			<nombre>BI</nombre>
+		</banco>
+		<banco>
+			<codigo>2</codigo>
+			<nombre>GyT</nombre>
+		</banco>
+		<banco>
+			<codigo>3</codigo>
+			<nombre>BanRural</nombre>
+		</banco>
+		<banco>
+			<codigo>4</codigo>
+			<nombre>BAM</nombre>
+		</banco>
+	</bancos>
+</config>

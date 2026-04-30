@@ -9,50 +9,133 @@
     <link rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
     <style>
-        body { background: #f4f6f9; }
-        .navbar-brand { font-weight: 700; letter-spacing: 1px; }
-        .sidebar { min-height: calc(100vh - 56px); background: #1a3c5e; }
-        .sidebar a { color: #cce4ff; text-decoration: none; display: block;
-                     padding: 10px 20px; border-radius: 6px; margin: 2px 8px; }
-        .sidebar a:hover, .sidebar a.active { background: #2e6da4; color: #fff; }
-        .sidebar .section-title { color: #6ea8d8; font-size: .75rem;
-                                   text-transform: uppercase; padding: 14px 20px 4px; }
-        .main-content { padding: 2rem; }
-        .card { border: none; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,.08); }
-        pre.xml-response { background:#1e1e1e; color:#d4d4d4;
-                           padding:1rem; border-radius:8px; font-size:.85rem;
-                           max-height:300px; overflow-y:auto; }
+        :root {
+            --itgsa-dark:  #1a3c5e;
+            --itgsa-mid:   #2e6da4;
+            --itgsa-light: #cce4ff;
+        }
+        body { background:#f4f6f9; font-family: 'Segoe UI', sans-serif; }
+        .navbar-brand { font-weight:700; letter-spacing:1px; }
+
+        /* Sidebar */
+        .sidebar {
+            min-height: calc(100vh - 56px);
+            background: var(--itgsa-dark);
+            width: 230px;
+            flex-shrink: 0;
+            position: sticky;
+            top: 56px;
+            height: calc(100vh - 56px);
+            overflow-y: auto;
+        }
+        .sidebar a {
+            color: var(--itgsa-light);
+            text-decoration: none;
+            display: block;
+            padding: 9px 18px;
+            border-radius: 6px;
+            margin: 2px 8px;
+            font-size: .92rem;
+            transition: background .15s;
+        }
+        .sidebar a:hover  { background: var(--itgsa-mid); color:#fff; }
+        .sidebar a.active { background: var(--itgsa-mid); color:#fff; font-weight:600; }
+        .sidebar .section-title {
+            color: #6ea8d8;
+            font-size: .72rem;
+            text-transform: uppercase;
+            letter-spacing: .08rem;
+            padding: 14px 20px 3px;
+        }
+
+        /* Cards y contenido */
+        .main-content { padding:2rem; min-width:0; }
+        .card { border:none; border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,.08); }
+        .card-header { border-radius: 12px 12px 0 0 !important; }
+        pre.xml-response {
+            background:#1e1e1e; color:#d4d4d4;
+            padding:1rem; border-radius:8px;
+            font-size:.82rem; max-height:260px; overflow-y:auto;
+        }
+
+        /* Toast de notificaciones */
+        .toast-container { position:fixed; bottom:1.5rem; right:1.5rem; z-index:9999; }
     </style>
 </head>
 <body>
-<nav class="navbar navbar-dark bg-primary px-3">
+
+<!-- Navbar top -->
+<nav class="navbar navbar-dark px-3 sticky-top" style="background:var(--itgsa-dark);">
     <a class="navbar-brand" href="/">
         <i class="bi bi-shop-window me-2"></i>ITGSA Sistema
     </a>
-    <span class="text-white-50 small">Industria Típica Guatemalteca S.A.</span>
+    <div class="d-flex align-items-center gap-3">
+        <span class="text-white-50 small d-none d-md-block">
+            Industria Típica Guatemalteca S.A.
+        </span>
+        <a href="http://localhost:5001/swagger" target="_blank"
+           class="btn btn-outline-light btn-sm">
+            <i class="bi bi-box-arrow-up-right me-1"></i>Swagger API
+        </a>
+    </div>
 </nav>
 
 <div class="d-flex">
     <!-- Sidebar -->
-    <div class="sidebar" style="width:230px; flex-shrink:0;">
+    <div class="sidebar">
         <div class="section-title">General</div>
-        <a href="/"><i class="bi bi-house me-2"></i>Inicio</a>
-        <a href="/Reset"><i class="bi bi-arrow-counterclockwise me-2"></i>Resetear datos</a>
+        @{
+            string path = ViewContext.HttpContext.Request.Path;
+            string Cls(string p) => path == p || path.StartsWith(p + "/") ? "active" : "";
+        }
+        <a href="/" class="@(path == "/" ? "active" : "")">
+            <i class="bi bi-speedometer2 me-2"></i>Panel de control
+        </a>
+        <a href="/Reset" class="@Cls("/Reset")">
+            <i class="bi bi-arrow-counterclockwise me-2"></i>Resetear datos
+        </a>
 
-        <div class="section-title">Archivos</div>
-        <a href="/Configuracion"><i class="bi bi-gear me-2"></i>Cargar config.xml</a>
-        <a href="/Transacciones"><i class="bi bi-file-earmark-arrow-up me-2"></i>Cargar transac.xml</a>
+        <div class="section-title">Archivos de entrada</div>
+        <a href="/Configuracion" class="@Cls("/Configuracion")">
+            <i class="bi bi-gear me-2"></i>Cargar config.xml
+        </a>
+        <a href="/Transacciones" class="@Cls("/Transacciones")">
+            <i class="bi bi-file-earmark-arrow-up me-2"></i>Cargar transac.xml
+        </a>
 
         <div class="section-title">Peticiones</div>
-        <a href="/EstadoCuenta"><i class="bi bi-person-lines-fill me-2"></i>Estado de cuenta</a>
-        <a href="/Ingresos"><i class="bi bi-bar-chart-fill me-2"></i>Ingresos por banco</a>
+        <a href="/EstadoCuenta" class="@Cls("/EstadoCuenta")">
+            <i class="bi bi-person-lines-fill me-2"></i>Estado de cuenta
+        </a>
+        <a href="/Ingresos" class="@Cls("/Ingresos")">
+            <i class="bi bi-bar-chart-fill me-2"></i>Ingresos por banco
+        </a>
 
-        <div class="section-title">Otro</div>
-        <a href="/Ayuda"><i class="bi bi-question-circle me-2"></i>Ayuda</a>
+        <div class="section-title">Información</div>
+        <a href="/Ayuda" class="@Cls("/Ayuda")">
+            <i class="bi bi-question-circle me-2"></i>Ayuda
+        </a>
+        <a href="/Ayuda/Documentacion" class="@Cls("/Ayuda/Documentacion")">
+            <i class="bi bi-file-earmark-text me-2"></i>Documentación
+        </a>
     </div>
 
-    <!-- Contenido -->
+    <!-- Contenido principal -->
     <div class="main-content flex-grow-1">
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show mb-3">
+                <i class="bi bi-exclamation-triangle me-2"></i>@TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show mb-3">
+                <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
         @RenderBody()
     </div>
 </div>
