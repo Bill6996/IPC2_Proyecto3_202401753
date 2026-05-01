@@ -4,9 +4,10 @@
 Facultad de Ingeniería — Escuela de Ciencias y Sistemas  
 Introducción a la Programación y Computación 2  
 
-**Estudiante:** [Tu nombre completo]  
+**Estudiante:** Bily Vallecidos Folgar
 **Carnet:** 202401753  
-**Catedráticos:** Inga. Claudia Liceth Rojas Morales, Ing. Marlon Antonio Pérez Türk, Ing. José Manuel Ruiz Juárez, Ing. Dennis Stanley Barrios González, Ing. Edwin Estuardo Zapeta Gómez, Ing. Fernando José Paz González
+**Catedráticos:** Inga. Claudia Liceth Rojas Morales, 
+Auxiliar: Diego
 
 ---
 
